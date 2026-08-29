@@ -1,0 +1,25 @@
+# --- Web / API ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+
+# --- RAG / LangChain ---
+langchain>=0.3
+langchain-anthropic>=0.3
+langchain-huggingface>=0.1
+langchain-chroma>=0.2
+langchain-text-splitters>=0.3
+
+# --- Vector DB + Embedding (chạy local) ---
+chromadb>=0.5
+sentence-transformers>=3.0
+
+# --- Đọc PDF ---
+pypdf>=5.0
+
+# --- Cấu hình ---
+pydantic-settings>=2.5
+python-dotenv>=1.0
+
+# --- Dev / test ---
+pytest>=8.0

@@ -1,0 +1,236 @@
+{
+  "_huong_dan": [
+    "Bộ test cho 2 tài liệu trong data/: BARR-C:2018 Embedded C Coding Standard + Peter Marwedel 'Embedded System Design' (4th ed).",
+    "25 câu in_scope (13 từ BARR-C, 12 từ Marwedel) + 10 câu out_of_scope (chủ đề embedded/C nhưng KHÔNG có trong 2 sách).",
+    "relevant_keywords: chỉ cần 1 chunk truy hồi chứa 1 keyword (không phân biệt hoa thường) => tính 'hit' cho retrieval accuracy.",
+    "relevant_pages: số trang PDF (metadata 'page'); khớp trang cũng tính 'hit'.",
+    "Nếu bạn thay tài liệu khác thì phải viết lại toàn bộ file này."
+  ],
+  "questions": [
+    {
+      "id": "barr-01",
+      "type": "in_scope",
+      "question": "What is the maximum line width allowed for a line of code in BARR-C?",
+      "relevant_keywords": ["80 characters", "line width"],
+      "relevant_pages": [21]
+    },
+    {
+      "id": "barr-02",
+      "type": "in_scope",
+      "question": "Which two C keywords does BARR-C say shall not be used at all?",
+      "relevant_keywords": ["auto keyword", "register keyword"],
+      "relevant_pages": [26]
+    },
+    {
+      "id": "barr-03",
+      "type": "in_scope",
+      "question": "What does the BARR-C standard recommend about using the goto keyword?",
+      "relevant_keywords": ["goto", "enclosing block"],
+      "relevant_pages": [26, 67]
+    },
+    {
+      "id": "barr-04",
+      "type": "in_scope",
+      "question": "How must braces be placed around blocks following if, else, while and for statements?",
+      "relevant_keywords": ["braces shall always surround", "left brace"],
+      "relevant_pages": [22]
+    },
+    {
+      "id": "barr-05",
+      "type": "in_scope",
+      "question": "Which fixed-width integer types should be used instead of char, short, int and long?",
+      "relevant_keywords": ["int8_t", "uint32_t", "stdint.h"],
+      "relevant_pages": [46]
+    },
+    {
+      "id": "barr-06",
+      "type": "in_scope",
+      "question": "What does BARR-C say about testing equality or inequality of floating point values?",
+      "relevant_keywords": ["equality or inequality of floating point", "floating point"],
+      "relevant_pages": [48]
+    },
+    {
+      "id": "barr-07",
+      "type": "in_scope",
+      "question": "How should a variable that holds Boolean information be named according to BARR-C?",
+      "relevant_keywords": ["begin with the letter ‘b’", "b_done_yet", "b_is_buffer_full"],
+      "relevant_pages": [61]
+    },
+    {
+      "id": "barr-08",
+      "type": "in_scope",
+      "question": "What are the minimum and maximum lengths allowed for a variable name?",
+      "relevant_keywords": ["31 characters", "shorter than 3 characters"],
+      "relevant_pages": [60]
+    },
+    {
+      "id": "barr-09",
+      "type": "in_scope",
+      "question": "When comparing a variable against a constant for equality, where must the constant be placed?",
+      "relevant_keywords": ["left of the equal-to operator", "NULL == p_object"],
+      "relevant_pages": [68]
+    },
+    {
+      "id": "barr-10",
+      "type": "in_scope",
+      "question": "How must an infinite loop be implemented according to BARR-C?",
+      "relevant_keywords": ["for (;;)", "Infinite loops"],
+      "relevant_pages": [66]
+    },
+    {
+      "id": "barr-11",
+      "type": "in_scope",
+      "question": "What must every switch statement contain?",
+      "relevant_keywords": ["contain a default block", "default block"],
+      "relevant_pages": [65]
+    },
+    {
+      "id": "barr-12",
+      "type": "in_scope",
+      "question": "How deeply may nested if-else statements be nested in BARR-C?",
+      "relevant_keywords": ["not be deeper than two levels", "two levels"],
+      "relevant_pages": [64]
+    },
+    {
+      "id": "barr-13",
+      "type": "in_scope",
+      "question": "What suffix must the name of a function that implements an interrupt service routine end with?",
+      "relevant_keywords": ["_isr", "interrupt service routines"],
+      "relevant_pages": [58]
+    },
+    {
+      "id": "marwedel-01",
+      "type": "in_scope",
+      "question": "How does the book define an embedded system?",
+      "relevant_keywords": ["information processing system", "embedded into an enclosing product"],
+      "relevant_pages": [7, 22]
+    },
+    {
+      "id": "marwedel-02",
+      "type": "in_scope",
+      "question": "What is a cyber-physical system (CPS)?",
+      "relevant_keywords": ["cyber-physical", "computational and physical"],
+      "relevant_pages": [22, 36]
+    },
+    {
+      "id": "marwedel-03",
+      "type": "in_scope",
+      "question": "What priority assignment does rate monotonic (RM) scheduling use?",
+      "relevant_keywords": ["rate monotonic", "period"],
+      "relevant_pages": [329, 330]
+    },
+    {
+      "id": "marwedel-04",
+      "type": "in_scope",
+      "question": "How does Earliest Deadline First (EDF) scheduling decide which task runs?",
+      "relevant_keywords": ["earliest deadline", "EDF"],
+      "relevant_pages": [332, 322]
+    },
+    {
+      "id": "marwedel-05",
+      "type": "in_scope",
+      "question": "What is priority inversion and which resource access protocols address it?",
+      "relevant_keywords": ["priority inversion", "priority inheritance", "priority ceiling"],
+      "relevant_pages": [230, 232]
+    },
+    {
+      "id": "marwedel-06",
+      "type": "in_scope",
+      "question": "Why is the worst-case execution time (WCET) of a program difficult to determine?",
+      "relevant_keywords": ["worst-case execution time", "WCET"],
+      "relevant_pages": [261, 262]
+    },
+    {
+      "id": "marwedel-07",
+      "type": "in_scope",
+      "question": "What did StateCharts add on top of classical finite state machines?",
+      "relevant_keywords": ["StateChart", "hierarchy"],
+      "relevant_pages": [70, 78]
+    },
+    {
+      "id": "marwedel-08",
+      "type": "in_scope",
+      "question": "What is a Kahn Process Network (KPN)?",
+      "relevant_keywords": ["Kahn process network", "FIFO"],
+      "relevant_pages": [88, 90]
+    },
+    {
+      "id": "marwedel-09",
+      "type": "in_scope",
+      "question": "How does a successive approximation analog-to-digital converter work?",
+      "relevant_keywords": ["successive approximation"],
+      "relevant_pages": [158, 160]
+    },
+    {
+      "id": "marwedel-10",
+      "type": "in_scope",
+      "question": "What is loop tiling (loop blocking) and why is it applied?",
+      "relevant_keywords": ["tiling", "blocking", "memory hierarchy"],
+      "relevant_pages": [366, 367]
+    },
+    {
+      "id": "marwedel-11",
+      "type": "in_scope",
+      "question": "What are the two kinds of nodes that make up a Petri net?",
+      "relevant_keywords": ["Petri net", "places", "transitions"],
+      "relevant_pages": [104, 143]
+    },
+    {
+      "id": "marwedel-12",
+      "type": "in_scope",
+      "question": "What does boundary scan (JTAG) provide for testing embedded hardware?",
+      "relevant_keywords": ["boundary scan", "JTAG"],
+      "relevant_pages": [402, 403]
+    },
+    {
+      "id": "out-01",
+      "type": "out_of_scope",
+      "question": "What is the full pinout of the Arduino Uno board?"
+    },
+    {
+      "id": "out-02",
+      "type": "out_of_scope",
+      "question": "What are the parameters of the FreeRTOS xQueueCreate() function?"
+    },
+    {
+      "id": "out-03",
+      "type": "out_of_scope",
+      "question": "How do I debug an embedded target with OpenOCD and GDB over SWD?"
+    },
+    {
+      "id": "out-04",
+      "type": "out_of_scope",
+      "question": "How do I set up a CI/CD pipeline for firmware using GitHub Actions?"
+    },
+    {
+      "id": "out-05",
+      "type": "out_of_scope",
+      "question": "How do I flash firmware onto an ESP32 using esptool.py?"
+    },
+    {
+      "id": "out-06",
+      "type": "out_of_scope",
+      "question": "What is the difference between git merge and git rebase?"
+    },
+    {
+      "id": "out-07",
+      "type": "out_of_scope",
+      "question": "How do I implement a bootloader that performs firmware over-the-air (OTA) updates?"
+    },
+    {
+      "id": "out-08",
+      "type": "out_of_scope",
+      "question": "How do I configure the PLL and clock tree registers on an STM32F4 microcontroller?"
+    },
+    {
+      "id": "out-09",
+      "type": "out_of_scope",
+      "question": "How do I write C unit tests using the Unity and Ceedling frameworks?"
+    },
+    {
+      "id": "out-10",
+      "type": "out_of_scope",
+      "question": "What are the SOLID principles of object-oriented design?"
+    }
+  ]
+}

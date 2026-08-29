@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# Bí mật
+.env
+
+# Dữ liệu sinh ra khi chạy
+storage/
+data/*.pdf
+!data/.gitkeep
+
+# Cache model embedding (sentence-transformers tải về)
+.cache/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
