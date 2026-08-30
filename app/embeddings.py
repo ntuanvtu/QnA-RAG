@@ -1,7 +1,7 @@
-"""Embedding model chạy local (sentence-transformers).
+"""Local sentence-transformer embeddings used for document indexing and retrieval.
 
-Model được tải về máy lần đầu chạy (~90MB cho all-MiniLM-L6-v2), sau đó cache lại.
-Không tốn tiền, không cần API key.
+The model is downloaded once on first use and then reused, which keeps indexing
+free and avoids repeated initialization overhead.
 """
 from __future__ import annotations
 
@@ -13,12 +13,11 @@ _embeddings: HuggingFaceEmbeddings | None = None
 
 
 def get_embeddings() -> HuggingFaceEmbeddings:
-    """Trả về instance embedding dùng chung (khởi tạo 1 lần)."""
+    """Return the shared embedding client, creating it once and reusing it."""
     global _embeddings
     if _embeddings is None:
         _embeddings = HuggingFaceEmbeddings(
             model_name=settings.embedding_model,
-            # Chuẩn hoá vector -> khoảng cách cosine ổn định trong [0, 1]
             encode_kwargs={"normalize_embeddings": True},
         )
     return _embeddings

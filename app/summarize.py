@@ -1,10 +1,7 @@
-"""Chế độ tóm tắt / thao tác trên TOÀN BỘ một tài liệu (map-reduce).
+"""Whole-document summary mode for one file using a map-reduce pattern.
 
-Khác với RAG thường (chỉ lấy top-k chunk), ở đây lấy hết chunk của 1 file:
-  map    : tóm tắt từng lô chunk
-  reduce : gộp các bản tóm tắt lô thành một bản cuối
-
-Dùng khi người dùng hỏi kiểu "tóm tắt tài liệu", "liệt kê toàn bộ...", "mục lục".
+Unlike standard retrieval, this path reads every stored chunk for a source file,
+then summarizes each batch and merges them into a final answer.
 """
 from __future__ import annotations
 
@@ -15,26 +12,25 @@ from app.retriever import RetrievedChunk
 from app.vectorstore import get_vectorstore
 from config import settings
 
-_MAP_PROMPT = """Tóm tắt các đoạn trích sau (theo thứ tự) từ tài liệu "{source}".
-Giữ ý chính, thuật ngữ, số liệu quan trọng. Viết tiếng Việt, gọn, KHÔNG dùng markdown.
+_MAP_PROMPT = """Summarize the excerpts below from document "{source}" in order.
+Keep the key ideas, technical terms, and important numbers. Write in Vietnamese, keep it concise, and avoid markdown.
 {focus}
-ĐOẠN TRÍCH:
+EXCERPTS:
 {text}
 
-Tóm tắt phần này:"""
+Summary:"""
 
-_REDUCE_PROMPT = """Dưới đây là các bản tóm tắt từng phần của tài liệu "{source}" (theo thứ tự đọc).
-Tổng hợp thành MỘT bản tóm tắt mạch lạc, đủ ý, không lặp. Viết tiếng Việt, KHÔNG dùng markdown;
-nội dung có tính quy trình / phân loại thì trình bày dạng danh sách đánh số, mục con thụt lề.
+_REDUCE_PROMPT = """You are given several partial summaries of document "{source}" in reading order.
+Combine them into one coherent summary with no repetition. Write in Vietnamese and avoid markdown; if the content is procedural or classificatory, use numbered lists with nested subpoints.
 {focus}{note}
-CÁC BẢN TÓM TẮT PHẦN:
+PARTIAL SUMMARIES:
 {parts}
 
-Bản tóm tắt tổng hợp:"""
+Combined summary:"""
 
 
 def _chunks_of_source(source: str) -> list[tuple[int, str]]:
-    """(page, text) của mọi chunk thuộc file, sắp theo trang."""
+    """Return every chunk belonging to a source, sorted by page number."""
     got = get_vectorstore().get(where={"source": source}, include=["metadatas", "documents"])
     pairs = [
         (int(m.get("page", 0) or 0), doc)
@@ -44,7 +40,7 @@ def _chunks_of_source(source: str) -> list[tuple[int, str]]:
 
 
 def _batches(pairs: list[tuple[int, str]]) -> list[list[tuple[int, str]]]:
-    """Gộp chunk liền nhau thành lô ~summary_batch_chars ký tự."""
+    """Group nearby chunks into batches sized roughly to summary_batch_chars."""
     out: list[list[tuple[int, str]]] = []
     cur: list[tuple[int, str]] = []
     size = 0
@@ -60,7 +56,7 @@ def _batches(pairs: list[tuple[int, str]]) -> list[list[tuple[int, str]]]:
 
 
 def _evenly_sample(items: list, n: int) -> list:
-    """Lấy n phần tử trải đều trên danh sách (giữ nguyên thứ tự)."""
+    """Keep the ordering while sampling evenly across a long list."""
     if len(items) <= n:
         return items
     step = len(items) / n
@@ -68,20 +64,21 @@ def _evenly_sample(items: list, n: int) -> list:
 
 
 def _focus_line(question: str | None) -> str:
+    """Add a short focus hint to keep the summary aligned with the user's request."""
     q = (question or "").strip()
-    return f'Người dùng hỏi cụ thể: "{q}" — ưu tiên làm rõ trọng tâm đó.\n' if q else ""
+    return f'User asked specifically: "{q}" — prioritize that emphasis.\n' if q else ""
 
 
 def summarize_document(source: str, question: str | None = None):
-    """Tóm tắt toàn bộ `source`. Trả về app.rag.Answer."""
-    from app.rag import Answer  # tránh vòng import
+    """Create a full-document summary for a given source and return the standard Answer object."""
+    from app.rag import Answer  # Avoid a circular import at module import time.
 
     t0 = time.perf_counter()
     pairs = _chunks_of_source(source)
     if not pairs:
         return Answer(
-            question=question or f"Tóm tắt {source}",
-            answer=f'Không có nội dung nào của "{source}" trong hệ thống.',
+            question=question or f"Summary of {source}",
+            answer=f'No content for "{source}" is available in the system yet.',
             is_fallback=True,
             confidence=0.0,
             chunks=[],
@@ -93,8 +90,8 @@ def summarize_document(source: str, question: str | None = None):
     if len(batches) > settings.summary_max_batches:
         batches = _evenly_sample(batches, settings.summary_max_batches)
         note = (
-            f"\nLƯU Ý: tài liệu dài, bản tóm tắt dựa trên {len(batches)} phần trải đều "
-            "trên toàn tài liệu (không phải toàn văn)."
+            f"\nNOTE: This document is long, so the summary is based on {len(batches)} evenly sampled sections "
+            "instead of the entire text."
         )
 
     llm = get_llm()
@@ -125,7 +122,7 @@ def summarize_document(source: str, question: str | None = None):
 
     pages = sorted({p for p, _ in pairs})
     return Answer(
-        question=question or f"Tóm tắt {source}",
+        question=question or f"Summary of {source}",
         answer=final,
         is_fallback=False,
         confidence=1.0,
@@ -134,5 +131,5 @@ def summarize_document(source: str, question: str | None = None):
             for p, t in pairs[:1]
         ],
         latency_s=time.perf_counter() - t0,
-        sources=[f"{source} (toàn tài liệu, tr.{pages[0]}–{pages[-1]})"] if pages else [source],
+        sources=[f"{source} (full document, p.{pages[0]}–p.{pages[-1]})"] if pages else [source],
     )

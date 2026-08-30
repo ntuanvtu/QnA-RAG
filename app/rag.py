@@ -1,7 +1,6 @@
-"""Pipeline RAG: retrieve -> (kiểm tra fallback) -> sinh câu trả lời kèm trích dẫn.
+"""RAG pipeline: retrieve evidence, enforce fallback rules, and generate grounded answers.
 
-Chạy thử nhanh trên terminal:
-    python -m app.rag "Câu hỏi của bạn ở đây"
+This module is the single entry point for CLI, API, and evaluation flows.
 """
 from __future__ import annotations
 
@@ -17,36 +16,36 @@ from app.llm import get_llm
 from app.retriever import RetrievalResult, RetrievedChunk, retrieve
 from config import settings
 
-FALLBACK_MESSAGE = "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này."
+FALLBACK_MESSAGE = "No relevant information was found in the document to answer this question."
 
-REWRITE_PROMPT = """Viết lại tin nhắn của người dùng thành MỘT truy vấn tìm kiếm ngắn để tra cứu trong tài liệu kỹ thuật.
-- Bỏ cụm chỉ thị / xã giao ("hãy", "giải thích dễ hiểu", "tóm tắt giúp", "cho tôi biết"...), chỉ giữ chủ đề + từ khoá kỹ thuật.
-- Dịch sang tiếng Anh (tài liệu kỹ thuật thường bằng tiếng Anh).
-- Nếu tin nhắn đã là truy vấn tốt thì giữ gần như nguyên.
-Chỉ trả về truy vấn, không thêm gì khác.
+REWRITE_PROMPT = """Rewrite the user's message into a short search query for technical-document retrieval.
+- Remove conversational filler and instruction phrases such as "please", "explain slowly", "summarize", "tell me about".
+- Keep the technical topic and keywords.
+- Translate to English if the original question is in another language.
+- Return only the rewritten query.
 
-Tin nhắn: {q}
-Truy vấn:"""
+User message: {q}
+Search query:"""
 
-SYSTEM_PROMPT = """Bạn là trợ lý hỏi-đáp trên tài liệu kỹ thuật.
-Chỉ được trả lời DỰA HOÀN TOÀN vào phần "NGỮ CẢNH" bên dưới.
-Nếu ngữ cảnh không chứa đủ thông tin để trả lời, hãy trả lời CHÍNH XÁC câu sau và không thêm gì khác:
+SYSTEM_PROMPT = """You are a technical-document Q&A assistant.
+Only answer from the CONTEXT below.
+If the context does not contain enough information, reply with exactly this fallback:
 "{fallback}"
-Khi dùng thông tin từ ngữ cảnh, trích dẫn nguồn ngay sau ý đó theo dạng [nguồn: <tên file> tr.<số trang>].
-Trả lời chính xác, bằng tiếng Việt, không lan man.
+When you cite information from the context, append the source immediately after the statement in the format [source: <file> p.<page>].
+Respond accurately and concisely in Vietnamese.
 
-Định dạng (giao diện hiển thị văn bản thuần, KHÔNG render markdown):
-- Nội dung có nhiều bước / quy trình / phân loại / liệt kê -> trình bày dạng danh sách
-  đánh số hoặc gạch đầu dòng, có mục con thụt lề khi cần.
-- Câu hỏi định nghĩa hoặc hỏi một ý ngắn -> trả lời gọn 1-3 câu, KHÔNG ép thành danh sách.
-- KHÔNG dùng ký hiệu markdown (**, ##, `). Muốn nhấn mạnh thì viết hoa hoặc dùng dấu hai chấm."""
+Formatting rules:
+- For multi-step or procedural answers, use numbered lists or bullets.
+- For short factual answers, keep it to 1-3 sentences.
+- Do not use markdown formatting symbols such as **, ##, or `.
+"""
 
-USER_PROMPT = """NGỮ CẢNH:
+USER_PROMPT = """CONTEXT:
 {context}
 
-CÂU HỎI: {question}
+QUESTION: {question}
 
-Trả lời:"""
+Answer:"""
 
 
 @dataclass
@@ -58,21 +57,23 @@ class Answer:
     chunks: list[RetrievedChunk]
     latency_s: float
     sources: list[str] = field(default_factory=list)
-    search_query: str = ""  # truy vấn thực tế dùng để retrieve (sau khi viết lại)
+    search_query: str = ""  # The actual retrieval query after any rewrite step.
 
 
 def _format_context(chunks: list[RetrievedChunk]) -> str:
+    """Render retrieved chunks into a compact context block for the LLM prompt."""
     blocks = []
     for i, c in enumerate(chunks, 1):
-        loc = c.source + (f" tr.{c.page}" if c.page else "")
+        loc = c.source + (f" p.{c.page}" if c.page else "")
         blocks.append(f"[{i}] ({loc})\n{c.text}")
     return "\n\n".join(blocks)
 
 
 def _unique_sources(chunks: list[RetrievedChunk]) -> list[str]:
+    """Deduplicate citations while preserving the first-seen source order."""
     seen: list[str] = []
     for c in chunks:
-        s = c.source + (f" tr.{c.page}" if c.page else "")
+        s = c.source + (f" p.{c.page}" if c.page else "")
         if s not in seen:
             seen.append(s)
     return seen
@@ -86,23 +87,25 @@ _INSTRUCTION_RE = re.compile(
 
 
 def _needs_rewrite(question: str) -> bool:
-    """Chỉ viết lại khi cần: câu không phải tiếng Anh, hoặc có kèm cụm chỉ thị.
+    """Rewrite only when the input is likely to hurt retrieval quality.
 
-    Câu hỏi tiếng Anh gọn -> tìm thẳng, tránh làm lệch retrieval (giảm groundedness).
+    Clean English questions usually work better without rewriting because rewrite
+    steps can distort the original semantic target and reduce groundedness.
     """
     return not question.isascii() or bool(_INSTRUCTION_RE.search(question))
 
 
 def _rewrite_query(question: str) -> str:
-    """Chuẩn hoá câu hỏi thành truy vấn tìm kiếm (bỏ chỉ thị, dịch sang tiếng Anh).
+    """Normalize a question into a short retrieval query.
 
-    Lỗi hoặc kết quả rỗng -> dùng lại câu gốc.
+    If the rewrite step fails, we fall back to the original question rather than
+    blocking the request entirely.
     """
     try:
         out = get_llm().invoke(REWRITE_PROMPT.format(q=question)).content
         out = (out if isinstance(out, str) else str(out)).strip()
         return out or question
-    except Exception:  # noqa: BLE001 - rewrite hỏng thì lùi về câu gốc, không chặn luồng
+    except Exception:  # noqa: BLE001 - failed rewrite should never block the retrieval path
         return question
 
 
@@ -115,7 +118,7 @@ _SUMMARY_RE = re.compile(
 
 
 def _summary_intent(question: str) -> bool:
-    """Câu hỏi có phải yêu cầu tóm tắt / thao tác trên toàn bộ tài liệu không."""
+    """Detect requests that need an entire-document summary rather than top-k retrieval."""
     return bool(_SUMMARY_RE.search(question))
 
 
@@ -125,11 +128,14 @@ def answer_question(
     source: str | None = None,
     force_summary: bool = False,
 ) -> Answer:
+    """Entry point for the full RAG flow: normalize input, route the query, and generate a grounded answer.
+
+    The function is intentionally the single orchestration point so the CLI, API, and
+    evaluation pipeline all share the same fallback and grounding behavior.
+    """
     t0 = time.perf_counter()
-    # Chuẩn hoá Unicode: input từ HTTP có thể ở dạng NFD, làm hỏng match regex tiếng Việt.
     question = unicodedata.normalize("NFC", question)
 
-    # --- Chế độ tóm tắt toàn tài liệu (không đi qua retrieval top-k) ---
     if force_summary or _summary_intent(question):
         from app.summarize import summarize_document
         from app.vectorstore import list_sources
@@ -142,7 +148,7 @@ def answer_question(
             elif not names:
                 return Answer(
                     question=question,
-                    answer="Chưa có tài liệu nào trong hệ thống. Hãy đính kèm một file PDF trước.",
+                    answer="There are no documents in the system yet. Please upload a PDF first.",
                     is_fallback=True,
                     confidence=0.0,
                     chunks=[],
@@ -152,8 +158,7 @@ def answer_question(
                 return Answer(
                     question=question,
                     answer=(
-                        "Có nhiều tài liệu — hãy chọn một tài liệu ở ô \"Phạm vi\" "
-                        "rồi hỏi lại để tôi tóm tắt đúng tài liệu đó."
+                        "Multiple documents are available — please choose a source in the scope dropdown and ask again."
                     ),
                     is_fallback=True,
                     confidence=0.0,
@@ -169,7 +174,6 @@ def answer_question(
     )
     result: RetrievalResult = retrieve(search_query, k=k, source=source)
 
-    # --- Fallback tầng 1: retrieval không đủ tự tin -> không gọi LLM, khỏi tốn tiền ---
     if not result.is_confident:
         return Answer(
             question=question,
@@ -196,7 +200,6 @@ def answer_question(
         else str(response.content)
     ).strip()
 
-    # --- Fallback tầng 2: LLM tự nhận không đủ thông tin ---
     is_fb = FALLBACK_MESSAGE[:35].lower() in text.lower()
 
     return Answer(
@@ -212,14 +215,14 @@ def answer_question(
 
 
 if __name__ == "__main__":
-    q = " ".join(sys.argv[1:]) or input("Câu hỏi: ")
+    q = " ".join(sys.argv[1:]) or input("Question: ")
     a = answer_question(q)
     print("\n" + a.answer + "\n" + "-" * 40)
     if a.search_query and a.search_query.lower() != q.lower():
-        print(f"tìm với: {a.search_query}")
+        print(f"search query: {a.search_query}")
     print(
         f"confidence={a.confidence:.2f}  fallback={a.is_fallback}  "
         f"latency={a.latency_s:.2f}s"
     )
     if a.sources:
-        print("Nguồn:", "; ".join(a.sources))
+        print("Sources:", "; ".join(a.sources))

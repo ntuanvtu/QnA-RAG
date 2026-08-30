@@ -1,4 +1,4 @@
-"""Truy hồi chunk liên quan + tính điểm confidence cho câu hỏi."""
+"""Retrieve the most relevant chunks and score how confident the match is."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,7 +14,7 @@ class RetrievedChunk:
     text: str
     source: str
     page: int | None
-    score: float  # 0..1, càng cao càng liên quan
+    score: float  # 0..1, where a higher value means a stronger match.
 
 
 @dataclass
@@ -23,22 +23,21 @@ class RetrievalResult:
 
     @property
     def confidence(self) -> float:
-        """Điểm liên quan cao nhất trong top-k (0 nếu không có chunk nào)."""
+        """Return the strongest relevance score in the current top-k list."""
         return max((c.score for c in self.chunks), default=0.0)
 
     @property
     def is_confident(self) -> bool:
-        """Đủ tự tin để gọi LLM trả lời hay không."""
+        """Return True only when the retrieval quality is high enough to trust the answer."""
         return len(self.chunks) > 0 and self.confidence >= settings.confidence_threshold
 
 
 def retrieve(
     question: str, k: int | None = None, source: str | None = None
 ) -> RetrievalResult:
-    """Truy hồi top-k chunk. `source` != None -> chỉ tìm trong file đó."""
+    """Return the top-k matching chunks, optionally restricted to one source file."""
     k = k or settings.top_k
     vs = get_vectorstore()
-    # relevance score đã quy về [0, 1] (1 = giống nhất) nhờ cosine space.
     pairs: list[tuple[Document, float]] = vs.similarity_search_with_relevance_scores(
         question, k=k, filter={"source": source} if source else None
     )

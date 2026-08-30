@@ -1,11 +1,8 @@
-"""FastAPI: giao diện chatbot + API JSON cho hỏi đáp RAG.
+"""FastAPI app that serves the chat UI and JSON endpoints for the RAG workflow.
 
-Chạy:
+Run with:
     uvicorn app.api:app --reload
-rồi mở http://127.0.0.1:8000
-
-Frontend là một trang tĩnh (app/static/index.html) gọi các endpoint JSON dưới đây
-bằng fetch — không dùng template engine, không có state ngoài vector store trên đĩa.
+Then open http://127.0.0.1:8000 in the browser.
 """
 from __future__ import annotations
 
@@ -24,17 +21,19 @@ app = FastAPI(title="Technical Document Q&A (RAG)")
 
 @app.get("/")
 def home() -> FileResponse:
+    """Serve the static chat UI from the frontend folder."""
     return FileResponse(settings.static_dir / "index.html")
 
 
 @app.get("/api/info")
 def info() -> JSONResponse:
+    """Return the active LLM model name for the frontend."""
     return JSONResponse({"model": settings.llm_model})
 
 
 @app.get("/api/files")
 def files() -> JSONResponse:
-    """Danh sách tài liệu đã nạp (cho dropdown chọn phạm vi)."""
+    """Return all ingested documents with chunk counts for the scope dropdown."""
     return JSONResponse(list_sources())
 
 
@@ -45,10 +44,10 @@ async def chat(
     summarize: str = Form(""),
     file: UploadFile | None = File(None),
 ) -> JSONResponse:
-    """Một lượt chat: nếu có file đính kèm thì tự nạp trước, rồi trả lời câu hỏi.
+    """Handle one chat turn and auto-ingest an uploaded PDF when needed.
 
-    `source` != "" -> chỉ tìm câu trả lời trong file đó.
-    `summarize` = "1" -> ép chế độ tóm tắt toàn bộ tài liệu.
+    This keeps the upload flow simple: the user can submit a file and a question in
+    the same request, and the answer logic sees the refreshed corpus immediately.
     """
     ingested: str | None = None
     try:
@@ -59,22 +58,22 @@ async def chat(
                 shutil.copyfileobj(file.file, f)
             n = ingest_pdf(dest)
             ingested = (
-                f"Đã nạp {n} đoạn từ {dest.name}."
+                f"Ingested {n} chunks from {dest.name}."
                 if n
-                else f"{dest.name} đã có sẵn trong hệ thống."
+                else f"{dest.name} is already present in the system."
             )
 
         if not question.strip():
             if ingested:
                 return JSONResponse({"answer": None, "ingested": ingested})
             return JSONResponse(
-                {"error": "Nhập câu hỏi hoặc đính kèm tài liệu."}, status_code=400
+                {"error": "Please enter a question or upload a document."}, status_code=400
             )
 
         ans = answer_question(
             question, source=source or None, force_summary=summarize == "1"
         )
-    except Exception as e:  # noqa: BLE001 - endpoint không được sập vì 1 request lỗi
+    except Exception as e:  # noqa: BLE001 - a single bad request should not crash the endpoint
         return JSONResponse({"error": str(e)}, status_code=400)
 
     return JSONResponse(
@@ -92,6 +91,6 @@ async def chat(
 
 @app.post("/api/reset")
 def reset() -> JSONResponse:
-    """Xoá toàn bộ tài liệu đã nạp khỏi vector store."""
+    """Clear the entire in-memory vector collection and start from an empty corpus."""
     get_vectorstore().reset_collection()
     return JSONResponse({"ok": True})

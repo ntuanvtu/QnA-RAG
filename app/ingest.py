@@ -1,8 +1,8 @@
-"""Ingest PDF: đọc -> chia chunk -> embed -> lưu vào Chroma.
+"""PDF ingestion pipeline: extract text, split it into chunks, embed it, and store it in Chroma.
 
-Chạy trực tiếp:
-    python -m app.ingest data/tai-lieu.pdf     # nạp 1 file
-    python -m app.ingest                        # nạp mọi PDF trong data/
+Run directly:
+    python -m app.ingest data/example.pdf
+    python -m app.ingest
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from config import settings
 
 
 def _splitter() -> RecursiveCharacterTextSplitter:
-    # Ưu tiên cắt ở ranh giới đoạn/câu để không cắt giữa câu khi tránh được.
+    """Prefer structural boundaries so chunks do not break mid-sentence or mid-section."""
     return RecursiveCharacterTextSplitter(
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
@@ -29,11 +29,11 @@ def _splitter() -> RecursiveCharacterTextSplitter:
 
 
 def _load_pages(pdf_path: Path) -> list[Document]:
-    """Đọc PDF -> mỗi trang là 1 Document. Bỏ qua trang không trích được chữ.
+    """Extract one document per page while skipping blank pages.
 
-    Dùng pypdfium2 (PDFium — engine PDF của Chromium): trích text ổn định hơn
-    với layout nhiều cột / slide. Chữ nằm trong ảnh raster (sơ đồ, ảnh chụp) vẫn
-    không đọc được — cần OCR, ngoài phạm vi project (xem README).
+    We rely on pypdfium2 because it handles technical layouts and multi-column PDF
+    text much more reliably than text-only extraction. Raster-image PDFs still
+    fall outside the project scope unless OCR is added later.
     """
     pages: list[Document] = []
     pdf = pdfium.PdfDocument(str(pdf_path))
@@ -45,7 +45,6 @@ def _load_pages(pdf_path: Path) -> list[Document]:
             textpage.close()
             page.close()
             if text:
-                # page đánh số từ 0; +1 khi hiển thị cho người đọc (làm ở dưới)
                 pages.append(Document(page_content=text, metadata={"page": idx}))
     finally:
         pdf.close()
@@ -53,11 +52,11 @@ def _load_pages(pdf_path: Path) -> list[Document]:
 
 
 def _merge_sparse_pages(pages: list[Document]) -> list[Document]:
-    """Gộp các trang liền nhau tới khi khối đủ 'dày' (>= sparse_block_chars).
+    """Merge consecutive pages for slide-like PDFs so chunks remain informative.
 
-    Dùng cho PDF trình chiếu: mỗi slide chỉ vài dòng rời rạc; để nguyên từng trang
-    thì chunk quá ngắn, embedding nhiễu, retrieve trượt. `page` của khối lấy theo
-    trang đầu tiên trong khối (trích dẫn sẽ trỏ tới slide đầu của cụm liên quan).
+    Sparse decks often produce tiny, noisy chunks when each page is processed alone.
+    The block page number keeps the first page of the merged run, which is a trade-off
+    that preserves retrieval quality while keeping citations close to the relevant cluster.
     """
     blocks: list[Document] = []
     buf: list[str] = []
@@ -79,15 +78,14 @@ def _merge_sparse_pages(pages: list[Document]) -> list[Document]:
 
 
 def ingest_pdf(pdf_path: str | Path) -> int:
-    """Nạp 1 file PDF vào vector store. Trả về số chunk đã thêm (0 = file y hệt đã có sẵn).
+    """Add a single PDF to the vector store and return the number of chunks inserted.
 
-    Chống chunk trùng khi UI tự động ingest mỗi lần submit:
-      - Nội dung file (SHA-256) đã có trong store  -> bỏ qua, không embed lại.
-      - Cùng tên file nhưng nội dung khác (bản mới) -> xoá chunk cũ rồi nạp lại.
+    This avoids duplicate indexing when the same file is re-uploaded and lets the UI
+    refresh a file by name even if content changed, without leaving stale chunks behind.
     """
     pdf_path = Path(pdf_path)
     if not pdf_path.exists():
-        raise FileNotFoundError(f"Không thấy file: {pdf_path}")
+        raise FileNotFoundError(f"File not found: {pdf_path}")
 
     content_hash = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
     vs = get_vectorstore()
@@ -97,11 +95,10 @@ def ingest_pdf(pdf_path: str | Path) -> int:
     pages = _load_pages(pdf_path)
     if not pages:
         raise ValueError(
-            f"Không trích được chữ từ {pdf_path.name} "
-            "(PDF scan ảnh cần OCR — ngoài phạm vi project này)."
+            f"No extractable text was found in {pdf_path.name}. "
+            "Image-only PDFs require OCR and are outside the current scope."
         )
 
-    # Tài liệu trình chiếu (text thưa) -> gộp slide liền nhau trước khi chunk.
     median_chars = statistics.median(len(p.page_content) for p in pages)
     if median_chars < settings.sparse_median_threshold:
         pages = _merge_sparse_pages(pages)
@@ -112,7 +109,6 @@ def ingest_pdf(pdf_path: str | Path) -> int:
         c.metadata["page"] = int(c.metadata.get("page", 0)) + 1
         c.metadata["content_hash"] = content_hash
 
-    # Dọn bản cũ cùng tên (nếu có) trước khi nạp bản mới.
     if vs.get(where={"source": pdf_path.name}, limit=1)["ids"]:
         vs.delete(where={"source": pdf_path.name})
 
@@ -121,7 +117,7 @@ def ingest_pdf(pdf_path: str | Path) -> int:
 
 
 def ingest_dir(data_dir: str | Path | None = None) -> dict[str, int]:
-    """Nạp mọi file *.pdf trong thư mục. Trả về {tên_file: số_chunk}."""
+    """Ingest every PDF in a directory and return a file-to-chunk count map."""
     data_dir = Path(data_dir or settings.data_dir)
     return {pdf.name: ingest_pdf(pdf) for pdf in sorted(data_dir.glob("*.pdf"))}
 
@@ -129,10 +125,10 @@ def ingest_dir(data_dir: str | Path | None = None) -> dict[str, int]:
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         n = ingest_pdf(sys.argv[1])
-        print(f"Đã nạp {n} chunk từ {sys.argv[1]}")
+        print(f"Inserted {n} chunks from {sys.argv[1]}")
     else:
         results = ingest_dir()
         if not results:
-            print(f"Không tìm thấy PDF nào trong {settings.data_dir}")
+            print(f"No PDF files were found in {settings.data_dir}")
         for name, n in results.items():
-            print(f"{name}: {n} chunk")
+            print(f"{name}: {n} chunks")

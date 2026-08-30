@@ -1,4 +1,4 @@
-"""Khởi tạo client Claude (qua LangChain)."""
+"""Shared Claude client wrapper for the generation stage of the RAG pipeline."""
 from __future__ import annotations
 
 from langchain_anthropic import ChatAnthropic
@@ -9,11 +9,11 @@ _llm: ChatAnthropic | None = None
 
 
 def get_llm() -> ChatAnthropic:
-    """Trả về client Claude dùng chung. Báo lỗi rõ ràng nếu thiếu API key."""
+    """Return the shared Claude client and fail fast when the API key is absent."""
     global _llm
     if not settings.anthropic_api_key:
         raise RuntimeError(
-            "Chưa có ANTHROPIC_API_KEY. Tạo file .env (xem .env.example) và điền key."
+            "ANTHROPIC_API_KEY is not configured. Add it to the .env file referenced by .env.example."
         )
     if _llm is None:
         _llm = ChatAnthropic(
