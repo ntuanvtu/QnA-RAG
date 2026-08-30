@@ -18,15 +18,21 @@ import statistics
 from pathlib import Path
 
 from app.llm import get_llm
-from app.rag import answer_question
-from app.retriever import retrieve
+from app.rag import RetrievedChunk, answer_question
 from config import settings
 
 TESTSET = Path(__file__).parent / "testset.json"
 
 
-def _retrieval_hit(question: str, keywords: list[str], pages: list[int], k: int) -> bool:
-    for c in retrieve(question, k=k).chunks:
+def _retrieval_hit(
+    chunks: list[RetrievedChunk], keywords: list[str], pages: list[int]
+) -> bool:
+    """Đoạn chứa đáp án có nằm trong top-k đã retrieve không (khớp keyword hoặc trang).
+
+    Nhận thẳng `chunks` từ `answer_question` để phản ánh đúng truy vấn thật
+    (đã qua bước viết lại câu hỏi), không retrieve lại bằng câu gốc.
+    """
+    for c in chunks:
         text = c.text.lower()
         if any(kw.lower() in text for kw in keywords):
             return True
@@ -83,10 +89,9 @@ def main() -> None:
             # 1. Retrieval accuracy
             retr_total += 1
             retr_hit = _retrieval_hit(
-                q["question"],
+                ans.chunks,
                 q.get("relevant_keywords", []),
                 q.get("relevant_pages", []),
-                k,
             )
             retr_hits += retr_hit
 

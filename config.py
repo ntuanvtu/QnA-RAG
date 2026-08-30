@@ -29,9 +29,21 @@ class Settings(BaseSettings):
     # --- Chunking ---
     chunk_size: int = 1000
     chunk_overlap: int = 150
+    # Tài liệu kiểu trình chiếu (slide): text thưa, rời rạc theo trang.
+    # Nếu số ký tự TRUNG VỊ mỗi trang < ngưỡng -> gộp các trang liền nhau thành
+    # khối >= sparse_block_chars trước khi chunk (đỡ rời rạc, embed có nghĩa hơn).
+    sparse_median_threshold: int = 700
+    sparse_block_chars: int = 600
 
     # --- Retrieval ---
     top_k: int = 4
+    # Trước khi tìm: nhờ Claude viết lại câu hỏi thành truy vấn tìm kiếm
+    # (bỏ cụm chỉ thị, dịch sang tiếng Anh). Tốn thêm 1 lần gọi LLM mỗi câu.
+    enable_query_rewrite: bool = True
+
+    # --- Chế độ tóm tắt / thao tác toàn tài liệu (map-reduce) ---
+    summary_batch_chars: int = 6000     # gộp chunk thành lô ~ngần này ký tự để "map"
+    summary_max_batches: int = 10       # tài liệu dài hơn -> lấy mẫu đều tối đa ngần này lô
     # Điểm similarity nằm trong [0, 1] (1 = giống nhất).
     # Nếu điểm cao nhất của top-k < ngưỡng này -> trả lời fallback, không gọi LLM.
     confidence_threshold: float = 0.35
@@ -39,6 +51,7 @@ class Settings(BaseSettings):
     # --- Đường dẫn ---
     data_dir: Path = BASE_DIR / "data"
     vector_dir: Path = BASE_DIR / "storage" / "chroma"
+    static_dir: Path = BASE_DIR / "app" / "static"
     collection_name: str = "documents"
 
 

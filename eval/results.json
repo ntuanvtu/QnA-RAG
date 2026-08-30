@@ -8,8 +8,8 @@
     "groundedness": 1.0,
     "oos_refused": "10/10",
     "in_scope_answered": "23/25",
-    "latency_mean_s": 3.12,
-    "latency_p95_s": 6.1
+    "latency_mean_s": 2.93,
+    "latency_p95_s": 6.69
   },
   "results": [
     {
@@ -18,10 +18,10 @@
       "question": "What is the maximum line width allowed for a line of code in BARR-C?",
       "is_fallback": false,
       "confidence": 0.738,
-      "latency_s": 14.24,
+      "latency_s": 15.2,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn BARR-C:2018, chiều rộng tối đa cho một dòng code là **80 ký tự** [nguồn: barr_c_coding_standard_2018.pdf tr.21].",
+      "answer": "Theo tiêu chuẩn BARR-C:2018, chiều rộng tối đa cho một dòng mã là 80 ký tự [nguồn: barr_c_coding_standard_2018.pdf tr.21].",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.21",
         "barr_c_coding_standard_2018.pdf tr.36",
@@ -35,10 +35,10 @@
       "question": "Which two C keywords does BARR-C say shall not be used at all?",
       "is_fallback": true,
       "confidence": 0.632,
-      "latency_s": 2.17,
+      "latency_s": 2.28,
       "retrieval_hit": false,
       "grounded": null,
-      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.\n\nTài liệu chỉ đề cập đến việc có \"limitations on the use of the register and goto keywords\" [nguồn: barr_c_coding_standard_2018.pdf tr.16], nhưng không nói rõ rằng những từ khóa này \"shall not be used at all\" (không được sử dụng hoàn toàn).",
+      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.\n\nNgữ cảnh chỉ đề cập đến việc BARR-C có những hạn chế về sử dụng các từ khóa \"register\" và \"goto\", nhưng không nói rõ rằng chúng \"không được sử dụng hoàn toàn\" (shall not be used at all).",
       "sources": []
     },
     {
@@ -47,10 +47,10 @@
       "question": "What does the BARR-C standard recommend about using the goto keyword?",
       "is_fallback": false,
       "confidence": 0.678,
-      "latency_s": 4.64,
+      "latency_s": 4.44,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn BARR-C, việc sử dụng từ khóa `goto` được khuyến cáo như sau:\n\n1. **Tránh sử dụng**: Nên tránh tất cả việc sử dụng từ khóa `goto` [nguồn: barr_c_coding_standard_2018.pdf tr.26]\n\n2. **Nếu phải dùng**: Nếu `goto` được sử dụng, nó chỉ được phép nhảy đến một nhãn (label) được khai báo sau đó trong cùng một khối hoặc khối bao ngoài [nguồn: barr_c_coding_standard_2018.pdf tr.26]\n\n3. **Trường hợp ngoại lệ**: Việc sử dụng `goto` để xử lý một tình huống ngoại lệ là có thể chấp nhận được nếu nó làm cho mã trở nên đơn giản và rõ ràng hơn [nguồn: barr_c_coding_standard_2018.pdf tr.26]\n\n4. **Lý do**: Các thuật toán sử dụng `goto` có thể và nên được viết lại theo cách dễ đọc hơn và dễ bảo trì hơn [nguồn: barr_c_coding_standard_2018.pdf tr.67]",
+      "answer": "Theo tiêu chuẩn BARR-C, việc sử dụng từ khóa goto được khuyến nghị như sau [nguồn: barr_c_coding_standard_2018.pdf tr.26]:\n\n- Nên tránh sử dụng goto càng nhiều càng tốt (đây là một thực hành ưu tiên)\n- Nếu goto được sử dụng, nó chỉ được phép nhảy tới một nhãn được khai báo sau đó trong cùng một khối hoặc một khối bao quanh\n- Việc sử dụng goto một cách thỉnh thoảng để xử lý một tình huống ngoại lệ là chấp nhận được nếu nó làm cho mã trở nên đơn giản và rõ ràng hơn [nguồn: barr_c_coding_standard_2018.pdf tr.26]\n\nLý do là việc sử dụng goto thường dẫn đến \"spaghetti code\" và làm giảm khả năng bảo trì và đọc hiểu mã [nguồn: barr_c_coding_standard_2018.pdf tr.26].",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.26",
         "barr_c_coding_standard_2018.pdf tr.67",
@@ -62,11 +62,11 @@
       "type": "in_scope",
       "question": "How must braces be placed around blocks following if, else, while and for statements?",
       "is_fallback": false,
-      "confidence": 0.642,
-      "latency_s": 5.53,
+      "confidence": 0.65,
+      "latency_s": 3.42,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, braces phải được đặt như sau:\n\n1. **Braces phải luôn bao quanh các khối mã** (compound statements) sau các từ khóa if, else, switch, while, do, và for. Ngay cả các câu lệnh đơn và câu lệnh rỗng cũng phải được bao quanh bởi braces.\n\n2. **Vị trí đặt braces:**\n   - Dấu ngoặc mở trái ({) phải xuất hiện **riêng lẻ trên dòng bên dưới** phần bắt đầu của khối mã nó mở\n   - Dấu ngoặc đóng phải (}) phải xuất hiện **riêng lẻ ở cùng vị trí** với số dòng thích hợp sau đó trong tệp\n\n**Lý do:** Cách làm này loại bỏ hoàn toàn rủi ro liên quan đến các câu lệnh rỗng và câu lệnh đơn không được bao quanh bởi braces, những cấu trúc này thường gây ra lỗi khi mã gần đó bị thay đổi hoặc bị comment out. Việc đặt dấu ngoặc mở trên dòng tiếp theo cho phép kiểm tra trực quan dễ dàng để tìm dấu ngoặc đóng tương ứng. [nguồn: barr_c_coding_standard_2018.pdf tr.22]",
+      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, braces phải được đặt như sau [nguồn: barr_c_coding_standard_2018.pdf tr.22]:\n\n- Dấu ngoặc nhọn mở ({) phải xuất hiện riêng lẻ trên dòng bên dưới điểm bắt đầu của khối mã mà nó mở.\n- Dấu ngoặc nhọn đóng (}) tương ứng phải xuất hiện riêng lẻ ở cùng vị trí với số dòng thích hợp sau đó trong tệp.\n\nNgoài ra, braces phải luôn bao quanh các khối mã sau các từ khóa if, else, switch, while, do và for, kể cả các câu lệnh đơn lẻ và câu lệnh rỗng.",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.22",
         "barr_c_coding_standard_2018.pdf tr.33",
@@ -79,10 +79,10 @@
       "question": "Which fixed-width integer types should be used instead of char, short, int and long?",
       "is_fallback": false,
       "confidence": 0.686,
-      "latency_s": 3.35,
+      "latency_s": 2.67,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo Embedded C Coding Standard, các kiểu dữ liệu fixed-width integer sau đây nên được sử dụng thay cho char, short, int và long [nguồn: barr_c_coding_standard_2018.pdf tr.46]:\n\n| Độ rộng | Kiểu Signed | Kiểu Unsigned |\n|--------|------------|---------------|\n| 8 bits | int8_t | uint8_t |\n| 16 bits | int16_t | uint16_t |\n| 32 bits | int32_t | uint32_t |\n| 64 bits | int64_t | uint64_t |\n\nCác kiểu này được định nghĩa trong file header `stdint.h` và được giới thiệu trong tiêu chuẩn C99 để giải quyết vấn đề về tính di động của mã (portability) do các kiểu dữ liệu chuẩn có độ rộng phụ thuộc vào implementation.",
+      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, các kiểu dữ liệu fixed-width integer sau đây nên được sử dụng thay thế [nguồn: barr_c_coding_standard_2018.pdf tr.46]:\n\n- 8 bits: int8_t (signed) hoặc uint8_t (unsigned)\n- 16 bits: int16_t (signed) hoặc uint16_t (unsigned)\n- 32 bits: int32_t (signed) hoặc uint32_t (unsigned)\n- 64 bits: int64_t (signed) hoặc uint64_t (unsigned)\n\nCác kiểu này được định nghĩa trong tệp header stdint.h và giải quyết vấn đề về tính di động của mã do các kiểu char, short, int, long có độ rộng được định nghĩa tùy theo từng trình biên dịch.",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.46",
         "barr_c_coding_standard_2018.pdf tr.47",
@@ -95,10 +95,10 @@
       "question": "What does BARR-C say about testing equality or inequality of floating point values?",
       "is_fallback": false,
       "confidence": 0.53,
-      "latency_s": 2.54,
+      "latency_s": 2.45,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn BARR-C, **không bao giờ được kiểm tra bằng nhau hoặc không bằng nhau của các giá trị dấu phẩy động** [nguồn: barr_c_coding_standard_2018.pdf tr.48].\n\nĐây là một trong những quy tắc quan trọng khi làm việc với số dấu phẩy động, nhằm tránh các lỗi phát sinh từ việc sử dụng không chính xác phép toán dấu phẩy động.",
+      "answer": "Theo tiêu chuẩn BARR-C, KHÔNG BAO GIỜ được kiểm tra bằng nhau hoặc không bằng nhau của các giá trị dấu phẩy động [nguồn: barr_c_coding_standard_2018.pdf tr.48]. Quy tắc này được đưa ra vì một số lượng lớn các rủi ro về lỗi xuất phát từ việc sử dụng không chính xác phép toán dấu phẩy động.",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.48",
         "barr_c_coding_standard_2018.pdf tr.68",
@@ -111,10 +111,10 @@
       "question": "How should a variable that holds Boolean information be named according to BARR-C?",
       "is_fallback": false,
       "confidence": 0.562,
-      "latency_s": 4.16,
+      "latency_s": 3.52,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo BARR-C, một biến chứa thông tin Boolean phải được đặt tên như sau:\n\n1. **Bắt đầu bằng chữ 'b'**: Tên biến phải bắt đầu với chữ cái 'b' [nguồn: barr_c_coding_standard_2018.pdf tr.61]\n\n2. **Được diễn đạt dưới dạng câu hỏi**: Tên biến phải được cấu trúc như một câu hỏi mà nó trả lời [nguồn: barr_c_coding_standard_2018.pdf tr.61]\n\n**Ví dụ**: `b_done_yet` hoặc `b_is_buffer_full` [nguồn: barr_c_coding_standard_2018.pdf tr.61]\n\nNgoài ra, biến Boolean cũng phải tuân theo các quy tắc chung khác như: không chứa chữ hoa, sử dụng dấu gạch dưới để phân tách các từ, và có độ dài từ 3 đến 31 ký tự [nguồn: barr_c_coding_standard_2018.pdf tr.60].",
+      "answer": "Theo BARR-C, một biến chứa thông tin Boolean phải được đặt tên theo các quy tắc sau [nguồn: barr_c_coding_standard_2018.pdf tr.61]:\n\n- Tên biến phải bắt đầu bằng chữ 'b'\n- Tên phải được diễn đạt dưới dạng câu hỏi mà biến trả lời\n\nVí dụ: b_done_yet hoặc b_is_buffer_full\n\nNgoài ra, biến Boolean phải được khai báo với kiểu dữ liệu bool [nguồn: barr_c_coding_standard_2018.pdf tr.51], và các giá trị không phải Boolean phải được chuyển đổi thành Boolean thông qua các toán tử quan hệ (như < hoặc !=), không phải thông qua ép kiểu.",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.61",
         "barr_c_coding_standard_2018.pdf tr.51",
@@ -128,10 +128,10 @@
       "question": "What are the minimum and maximum lengths allowed for a variable name?",
       "is_fallback": false,
       "confidence": 0.596,
-      "latency_s": 1.75,
+      "latency_s": 1.98,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, độ dài của tên biến có các giới hạn sau:\n\n- **Độ dài tối thiểu**: 3 ký tự (bao gồm cả các biến vòng lặp)\n- **Độ dài tối đa**: 31 ký tự\n\n[nguồn: barr_c_coding_standard_2018.pdf tr.60]",
+      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, độ dài của tên biến phải tuân theo các quy tắc sau [nguồn: barr_c_coding_standard_2018.pdf tr.60]:\n\n- Độ dài tối thiểu: 3 ký tự (bao gồm cả các biến vòng lặp)\n- Độ dài tối đa: 31 ký tự",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.60",
         "barr_c_coding_standard_2018.pdf tr.61",
@@ -144,15 +144,15 @@
       "question": "When comparing a variable against a constant for equality, where must the constant be placed?",
       "is_fallback": false,
       "confidence": 0.662,
-      "latency_s": 3.92,
+      "latency_s": 1.81,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, khi so sánh một biến với một hằng số để kiểm tra tính bằng nhau, **hằng số phải luôn được đặt ở bên trái của toán tử bằng (==)** [nguồn: barr_c_coding_standard_2018.pdf tr.68].\n\nVí dụ đúng:\n```c\nif (NULL == p_object)\n{\n    return (ERR_NULL_PTR);\n}\n```\n\nLý do của quy tắc này là để phát hiện các lỗi gõ phím và các khiếm khuyết mã hóa khác tại thời điểm biên dịch. Nếu lập trình viên vô tình sử dụng toán tử gán (=) thay vì toán tử so sánh (==), trình biên dịch sẽ phát hiện lỗi khi cố gắng gán giá trị cho một hằng số.",
+      "answer": "Khi so sánh một biến với một hằng số để kiểm tra bằng nhau, hằng số phải được đặt ở BÊN TRÁI của toán tử bằng (==). [nguồn: barr_c_coding_standard_2018.pdf tr.68]\n\nVí dụ: if (NULL == p_object) thay vì if (p_object == NULL)",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.68",
         "barr_c_coding_standard_2018.pdf tr.23",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.168",
-        "barr_c_coding_standard_2018.pdf tr.66"
+        "barr_c_coding_standard_2018.pdf tr.61"
       ]
     },
     {
@@ -161,15 +161,15 @@
       "question": "How must an infinite loop be implemented according to BARR-C?",
       "is_fallback": false,
       "confidence": 0.538,
-      "latency_s": 1.7,
+      "latency_s": 1.77,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn BARR-C:2018, vòng lặp vô hạn phải được triển khai bằng cách sử dụng biểu thức điều khiển `for (;;)` [nguồn: barr_c_coding_standard_2018.pdf tr.66].",
+      "answer": "Theo BARR-C, vòng lặp vô hạn phải được triển khai bằng cách sử dụng biểu thức điều khiển for (;;) [nguồn: barr_c_coding_standard_2018.pdf tr.66]",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.66",
         "barr_c_coding_standard_2018.pdf tr.3",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.367",
-        "barr_c_coding_standard_2018.pdf tr.87"
+        "barr_c_coding_standard_2018.pdf tr.87",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.367"
       ]
     },
     {
@@ -181,12 +181,12 @@
       "latency_s": 1.31,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, mỗi switch statement phải chứa một **default block** [nguồn: barr_c_coding_standard_2018.pdf tr.65].",
+      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, mỗi switch statement phải chứa một default block [nguồn: barr_c_coding_standard_2018.pdf tr.65].",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.65",
         "barr_c_coding_standard_2018.pdf tr.64",
-        "barr_c_coding_standard_2018.pdf tr.11",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.134"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.134",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.108"
       ]
     },
     {
@@ -195,14 +195,14 @@
       "question": "How deeply may nested if-else statements be nested in BARR-C?",
       "is_fallback": false,
       "confidence": 0.598,
-      "latency_s": 2.43,
+      "latency_s": 2.35,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn BARR-C, các câu lệnh if…else lồng nhau không được sâu hơn **hai cấp độ**. Nếu cần sâu hơn, nên sử dụng các lệnh gọi hàm hoặc câu lệnh switch để giảm độ phức tạp và tăng khả năng hiểu mã. [nguồn: barr_c_coding_standard_2018.pdf tr.64]",
+      "answer": "Theo tiêu chuẩn BARR-C, các câu lệnh if…else lồng nhau không được sâu hơn hai cấp độ. Nếu cần sâu hơn, nên sử dụng các lệnh gọi hàm hoặc câu lệnh switch để giảm độ phức tạp và tăng khả năng hiểu mã [nguồn: barr_c_coding_standard_2018.pdf tr.64].",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.64",
-        "barr_c_coding_standard_2018.pdf tr.23",
         "barr_c_coding_standard_2018.pdf tr.22",
+        "barr_c_coding_standard_2018.pdf tr.23",
         "barr_c_coding_standard_2018.pdf tr.16"
       ]
     },
@@ -212,14 +212,14 @@
       "question": "What suffix must the name of a function that implements an interrupt service routine end with?",
       "is_fallback": false,
       "confidence": 0.518,
-      "latency_s": 1.71,
+      "latency_s": 1.48,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tiêu chuẩn Embedded C Coding Standard, tên của hàm thực hiện Interrupt Service Routine (ISR) phải kết thúc bằng hậu tố **\"_isr\"** [nguồn: barr_c_coding_standard_2018.pdf tr.58].",
+      "answer": "Theo tiêu chuẩn, tên của hàm thực hiện một interrupt service routine phải kết thúc bằng hậu tố \"_isr\" [nguồn: barr_c_coding_standard_2018.pdf tr.58].",
       "sources": [
         "barr_c_coding_standard_2018.pdf tr.58",
+        "barr_c_coding_standard_2018.pdf tr.84",
         "barr_c_coding_standard_2018.pdf tr.52",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.240",
         "barr_c_coding_standard_2018.pdf tr.27"
       ]
     },
@@ -228,16 +228,16 @@
       "type": "in_scope",
       "question": "How does the book define an embedded system?",
       "is_fallback": false,
-      "confidence": 0.758,
-      "latency_s": 3.68,
+      "confidence": 0.75,
+      "latency_s": 2.88,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, cuốn sách định nghĩa hệ thống nhúng theo hai cách:\n\n**Định nghĩa 1.1:** \"Embedded systems are information processing systems embedded into enclosing products\" (Hệ thống nhúng là các hệ thống xử lý thông tin được nhúng vào các sản phẩm bao quanh) [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]\n\n**Định nghĩa 1.11:** \"Information processing systems meeting most of the characteristics listed above are called embedded systems\" (Các hệ thống xử lý thông tin đáp ứng hầu hết các đặc điểm được liệt kê ở trên được gọi là hệ thống nhúng). Tác giả cũng lưu ý rằng định nghĩa này có một số mơ hồ, nhưng dường như không cần thiết cũng như không thể loại bỏ sự mơ hồ này [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.38]",
+      "answer": "Theo tài liệu, embedded system được định nghĩa như sau:\n\n\"Information processing systems meeting most of the characteristics listed above are called embedded systems.\" [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.38]\n\nTài liệu cũng lưu ý rằng định nghĩa này có tính mơ hồ nhất định, nhưng không cần thiết và cũng không thể loại bỏ được sự mơ hồ này. Ngoài ra, embedded systems được đặc trưng bởi các đặc điểm chung như ràng buộc thời gian thực (real-time constraints), yêu cầu về độ tin cậy (dependability) và hiệu quả (efficiency), cũng như liên kết chặt chẽ với các quá trình vật lý [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.10",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.1",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.38"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.38",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.9"
       ]
     },
     {
@@ -245,14 +245,14 @@
       "type": "in_scope",
       "question": "What is a cyber-physical system (CPS)?",
       "is_fallback": false,
-      "confidence": 0.805,
-      "latency_s": 4.42,
+      "confidence": 0.813,
+      "latency_s": 4.14,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, Hệ thống Cyber-Physical (CPS) được định nghĩa như sau:\n\n**\"Cyber-Physical Systems (CPS) là sự tích hợp của tính toán và các quá trình vật lý.\"** [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]\n\nCác đặc điểm chính của CPS:\n\n1. **Cấu trúc**: CPS = Hệ thống nhúng (phần xử lý thông tin) + Môi trường vật lý động [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]\n\n2. **Đặc điểm**: CPS được phối hợp, phân tán, kết nối và phải mạnh mẽ cũng như phản ứng nhanh [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]\n\n3. **Nhấn mạo**: Thuật ngữ CPS nhấn mạnh mối liên kết giữa các đối tượng vật lý (như ô tô, máy bay, hoặc các thiết bị thông minh) với các hệ thống tính toán [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.7]",
+      "answer": "Theo tài liệu, Cyber-Physical Systems (CPS) được định nghĩa như sau:\n\nCPS là sự tích hợp của tính toán và các quá trình vật lý [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]. Cụ thể hơn, CPS là các hệ thống kỹ thuật được xây dựng từ và phụ thuộc vào sự kết hợp của các thành phần tính toán và vật lý [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.7].\n\nVề cấu trúc, CPS bao gồm một hệ thống nhúng (phần xử lý thông tin) và một môi trường vật lý (động) [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22]. Các CPS mới nổi được mô tả là \"được phối hợp, phân tán, kết nối và phải mạnh mẽ cũng như phản ứng nhanh\" [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.22",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.45",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.36",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.7"
       ]
     },
@@ -261,15 +261,15 @@
       "type": "in_scope",
       "question": "What priority assignment does rate monotonic (RM) scheduling use?",
       "is_fallback": false,
-      "confidence": 0.655,
-      "latency_s": 4.0,
+      "confidence": 0.652,
+      "latency_s": 2.97,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, Rate Monotonic (RM) scheduling sử dụng **phân bổ ưu tiên dựa trên tỷ lệ (rate-based priority assignment)**, trong đó các tác vụ có chu kỳ ngắn hơn được gán ưu tiên cao hơn.\n\nCụ thể, như được mô tả trong Example 6.6: \"Task τ1 has the shortest period and, hence, the highest rate and priority. Each time task τ1 becomes available, its jobs preempt the currently active task.\" [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.329]\n\nNgoài ra, RM scheduling là **một chính sách lập lịch preemptive với ưu tiên cố định** [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.329], nghĩa là các ưu tiên được gán tĩnh dựa trên chu kỳ của các tác vụ và không thay đổi trong quá trình thực thi.",
+      "answer": "Rate monotonic (RM) scheduling sử dụng phân bổ ưu tiên dựa trên tỷ lệ (rate) của các tác vụ: tác vụ có chu kỳ ngắn nhất được gán ưu tiên cao nhất, và tác vụ có chu kỳ dài hơn được gán ưu tiên thấp hơn [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.329]. RM scheduling là một chính sách lập lịch có ưu tiên cố định và có thể ưu tiên (preemptive) [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.329].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.329",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.345",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.334",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.345",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.330"
       ]
     },
@@ -278,15 +278,15 @@
       "type": "in_scope",
       "question": "How does Earliest Deadline First (EDF) scheduling decide which task runs?",
       "is_fallback": false,
-      "confidence": 0.75,
-      "latency_s": 5.68,
+      "confidence": 0.748,
+      "latency_s": 3.1,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, Earliest Deadline First (EDF) scheduling quyết định nhiệm vụ nào chạy dựa trên nguyên tắc sau:\n\n**EDF thực thi nhiệm vụ có deadline tuyệt đối sớm nhất** trong số tất cả các nhiệm vụ sẵn sàng chạy tại bất kỳ thời điểm nào [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].\n\nCụ thể, cách hoạt động của EDF là:\n\n1. **Duy trì một hàng đợi**: Mỗi khi một nhiệm vụ mới sẵn sàng, nó được chèn vào một hàng đợi các nhiệm vụ sẵn sàng, được sắp xếp theo deadline của chúng [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].\n\n2. **Ưu tiên động**: Nếu một nhiệm vụ mới đến có deadline sớm hơn nhiệm vụ đang chạy, nhiệm vụ đang chạy sẽ bị preempt (ngắt) để cho phép nhiệm vụ có deadline sớm hơn chạy trước [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].\n\nEDF là một **thuật toán lập lịch động** và được chứng minh là tối ưu để giảm thiểu độ trễ tối đa [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].",
+      "answer": "EDF (Earliest Deadline First) scheduling quyết định task nào chạy bằng cách: tại bất kỳ thời điểm nào, nó thực thi task có deadline tuyệt đối sớm nhất trong số tất cả các task sẵn sàng chạy [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].\n\nCụ thể, EDF yêu cầu mỗi khi một task mới sẵn sàng, nó được chèn vào một hàng đợi các task sẵn sàng, được sắp xếp theo deadline của chúng. Nếu một task mới đến có deadline sớm hơn task đang chạy, task đó sẽ được chèn vào đầu hàng đợi và task hiện tại sẽ bị preempt (ngắt) [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.332",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.322",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.343"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.327"
       ]
     },
     {
@@ -294,11 +294,11 @@
       "type": "in_scope",
       "question": "What is priority inversion and which resource access protocols address it?",
       "is_fallback": false,
-      "confidence": 0.713,
-      "latency_s": 6.67,
+      "confidence": 0.714,
+      "latency_s": 4.64,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "## Priority Inversion\n\n**Định nghĩa:** Priority inversion là hiệu ứng thay đổi mức độ ưu tiên hiệu quả của các tiến trình. Nó xảy ra khi truy cập độc quyền vào tài nguyên dẫn đến việc một công việc có mức độ ưu tiên cao bị chặn bởi công việc có mức độ ưu tiên thấp hơn. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.230]\n\nMột ví dụ nổi bật là sự cố trên Mars Pathfinder, nơi truy cập độc quyền vào vùng bộ nhớ dùng chung đã gây ra priority inversion trên sao Hỏa. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.232]\n\n## Giao thức xử lý Priority Inversion\n\n**Priority Inheritance Protocol (PIP)** là một giao thức tiêu chuẩn có sẵn trong nhiều hệ điều hành thời gian thực để giải quyết vấn đề này. Theo giao thức này:\n- Các công việc được lên lịch theo mức độ ưu tiên hoạt động của chúng\n- Khi một công việc J1 bị chặn vì công việc J2 đang giữ tài nguyên độc quyền, nếu J2 có mức độ ưu tiên thấp hơn J1, thì J2 sẽ kế thừa mức độ ưu tiên của J1. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.232]\n\nRT-CORBA cũng bao gồm các quy định để giới hạn thời gian xảy ra priority inversion và cung cấp quản lý mức độ ưu tiên của luồng. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.251]",
+      "answer": "PRIORITY INVERSION là hiệu ứng làm thay đổi mức độ ưu tiên hiệu dụng của các tiến trình khi có truy cập loại trừ lẫn nhau vào tài nguyên. Nó xảy ra khi một công việc có mức độ ưu tiên cao bị chặn bởi một công việc có mức độ ưu tiên thấp hơn đang giữ tài nguyên được chia sẻ [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.230]. Vấn đề này đặc biệt nghiêm trọng trong các hệ thống nhúng vì sự phụ thuộc giữa các tiến trình là quy tắc chứ không phải ngoại lệ [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.230].\n\nGIAO THỨC GIẢI QUYẾT PRIORITY INVERSION:\n\n1. Priority Inheritance Protocol (PIP) - Đây là giao thức tiêu chuẩn có sẵn trong nhiều hệ điều hành thời gian thực. Khi một công việc J1 có mức độ ưu tiên cao bị chặn bởi công việc J2 có mức độ ưu tiên thấp hơn, J2 sẽ kế thừa mức độ ưu tiên của J1 để thực thi [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.232].\n\n2. RT-CORBA - Bao gồm các quy định để giới hạn thời gian xảy ra priority inversion, cung cấp quản lý mức độ ưu tiên của luồng, và hỗ trợ priority inheritance protocol [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.251].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.230",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.251",
@@ -310,11 +310,11 @@
       "type": "in_scope",
       "question": "Why is the worst-case execution time (WCET) of a program difficult to determine?",
       "is_fallback": false,
-      "confidence": 0.775,
-      "latency_s": 6.1,
+      "confidence": 0.771,
+      "latency_s": 6.69,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, WCET khó xác định vì những lý do sau:\n\n1. **Tính không quyết định**: Nói chung, việc tính toán WCET là không quyết định được. Điều này xuất phát từ thực tế rằng không thể quyết định được liệu một chương trình có kết thúc hay không [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261]\n\n2. **Kiến trúc bộ xử lý hiện đại**: Hiệu ứng của các đường ống (pipeline) trong kiến trúc bộ xử lý hiện đại với các loại nguy hiểm khác nhau và hệ thống bộ nhớ phân cấp với khả năng dự đoán tỷ lệ hit hạn chế rất khó dự đoán chính xác [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261]\n\n3. **Các tính năng phức tạp**: Việc tính toán WCET cho các hệ thống chứa ngắt (interrupts), bộ nhớ ảo (virtual memory) và bộ xử lý đa nhân (multiple processors) là một thách thức còn lớn hơn [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.262]\n\nDo những khó khăn này, thay vì tính WCET chính xác, người ta thường tính các giới hạn trên an toàn gọi là WCET_EST (estimated worst case execution time).",
+      "answer": "WCET của một chương trình khó xác định vì những lý do sau:\n\n1. Tính không quyết định: Nói chung, việc tính toán WCET là không quyết định được. Điều này xuất phát từ thực tế rằng không thể quyết định được liệu một chương trình có kết thúc hay không [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261].\n\n2. Hạn chế về phạm vi tính toán: WCET chỉ có thể được tính toán cho các chương trình nhất định (ví dụ: chương trình không có đệ quy, không có vòng lặp while, và các vòng lặp có số lần lặp đã biết). Ngay cả với những hạn chế này, thực tế vẫn không thể tính toán WCET một cách chính xác [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261].\n\n3. Tác động của kiến trúc bộ xử lý hiện đại: Các đặc tính như pipeline bộ xử lý với các loại hazard khác nhau và hệ thống bộ nhớ phân cấp có khả năng dự đoán tỷ lệ hit hạn chế rất khó dự đoán chính xác [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261].\n\n4. Phức tạp với các tính năng hệ thống: Việc tính toán WCET trở nên thách thức hơn nhiều đối với các hệ thống chứa ngắt, bộ nhớ ảo và bộ xử lý đa lõi [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.262].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.261",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.262"
@@ -325,15 +325,16 @@
       "type": "in_scope",
       "question": "What did StateCharts add on top of classical finite state machines?",
       "is_fallback": false,
-      "confidence": 0.631,
-      "latency_s": 3.78,
+      "confidence": 0.608,
+      "latency_s": 3.28,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Theo tài liệu, StateCharts bổ sung các tính năng chính sau so với các máy trạng thái hữu hạn (FSM) cổ điển:\n\n1. **Phân cấp (Hierarchy)**: StateCharts giới thiệu khái niệm \"superstates\" - các trạng thái có thể chứa các trạng thái khác bên trong. Điều này cho phép mô hình hóa các hệ thống phức tạp hơn với cấu trúc phân cấp [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.70]\n\n2. **Đồng thời (Concurrency)**: StateCharts hỗ trợ đồng thời, cho phép nhiều trạng thái hoạt động cùng một lúc [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.70]\n\n3. **Khả năng chỉ định thời gian (Timing)**: StateCharts bao gồm một cách hạn chế để chỉ định thời gian [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.70]\n\nTóm lại, StateCharts là các FSM mở rộng (extended FSMs) với khả năng mô hình hóa hệ thống có cấu trúc phân cấp, hỗ trợ đồng thời và một số khả năng chỉ định thời gian.",
+      "answer": "StateCharts thêm vào các máy trạng thái hữu hạn cổ điển những mở rộng sau:\n\n- Phân cấp (Hierarchy): Được giới thiệu thông qua các siêu trạng thái (superstates), cho phép các trạng thái chứa các trạng thái khác bên trong chúng [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.70]\n\n- Đồng thời (Concurrency): StateCharts hỗ trợ các mô hình đồng thời thông qua các siêu trạng thái AND và OR [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.74]\n\n- Bộ hẹn giờ (Timers): Cung cấp khả năng mô hình hóa thời gian trong các hệ thống nhúng, cho phép hệ thống rời khỏi một trạng thái sau một khoảng thời gian được chỉ định [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.74]",
       "sources": [
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.78",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.68",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.70",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.68"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.74",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.79"
       ]
     },
     {
@@ -341,11 +342,11 @@
       "type": "in_scope",
       "question": "What is a Kahn Process Network (KPN)?",
       "is_fallback": false,
-      "confidence": 0.789,
-      "latency_s": 5.79,
+      "confidence": 0.773,
+      "latency_s": 7.16,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Kahn Process Network (KPN) là một trường hợp đặc biệt của các mô hình luồng dữ liệu. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88]\n\nCác đặc điểm chính của KPN:\n\n1. **Cấu trúc**: KPN bao gồm các nút (nodes) và cạnh (edges). Các nút tương ứng với các phép tính được thực hiện bởi một chương trình hoặc tác vụ. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88]\n\n2. **Giao tiếp**: Các cạnh biểu thị giao tiếp thông qua các kênh chứa các FIFO có khả năng vô hạn. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88]\n\n3. **Tính chất độc lập**: Thứ tự mà một nút đọc dữ liệu từ các kênh của nó được xác định bởi chuỗi các phép toán đọc và không phụ thuộc vào thứ tự mà các nhà sản xuất truyền dữ liệu. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.89]\n\n4. **Tính Turing-complete**: KPN là Turing-complete, nghĩa là bất kỳ vấn đề nào có thể được tính toán trên máy Turing cũng có thể được tính toán trong KPN. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.137]",
+      "answer": "Kahn Process Network (KPN) là một trường hợp đặc biệt của các mô hình dòng dữ liệu. KPN bao gồm các nút và cạnh, trong đó nút tương ứng với các phép tính được thực hiện bởi một chương trình hoặc tác vụ, còn cạnh biểu thị giao tiếp qua các kênh chứa các FIFO có khả năng vô hạn. Các đồ thị KPN hiển thị các phép tính cần thực hiện và các phụ thuộc của chúng, nhưng không hiển thị thứ tự thực hiện các phép tính [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88].\n\nCác đặc điểm chính của KPN:\n\n- KPN là Turing-complete, nghĩa là bất kỳ vấn đề nào có thể tính toán trên máy Turing cũng có thể tính toán trong KPN [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.90]\n- Thứ tự đọc dữ liệu từ các kênh được xác định bởi chuỗi các phép toán đọc và không phụ thuộc vào thứ tự các nhà sản xuất truyền dữ liệu [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.89]\n- Thời gian thực hiện và thời gian giao tiếp có thể thay đổi, nhưng giao tiếp được đảm bảo xảy ra trong một khoảng thời gian hữu hạn [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88]\n- Số lượng quy trình phải được xác định tại thời điểm thiết kế, đây là một hạn chế quan trọng [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.90]",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.88",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.90",
@@ -358,15 +359,16 @@
       "type": "in_scope",
       "question": "How does a successive approximation analog-to-digital converter work?",
       "is_fallback": false,
-      "confidence": 0.649,
-      "latency_s": 5.43,
+      "confidence": 0.644,
+      "latency_s": 6.58,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "# Cách hoạt động của Bộ chuyển đổi Analog-to-Digital Successive Approximation\n\nBộ chuyển đổi successive approximation hoạt động dựa trên nguyên tắc **tìm kiếm nhị phân** [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.157]:\n\n1. **Bước khởi tạo**: Bit có ý nghĩa nhất (MSB) của successive approximation register được đặt thành '1', tất cả các bit khác được đặt thành '0'.\n\n2. **Chuyển đổi và so sánh**: Giá trị số này được chuyển đổi thành giá trị analog tương ứng với 0,5 lần điện áp đầu vào tối đa. Giá trị này được so sánh với tín hiệu đầu vào h(t).\n\n3. **Điều chỉnh bit**: Nếu h(t) vượt quá giá trị analog được tạo ra, bit MSB được giữ ở '1'; nếu không, nó được đặt lại thành '0'.\n\n4. **Lặp lại**: Quá trình này được lặp lại với bit tiếp theo cho đến khi tất cả các bit được xác định.\n\n**Ưu điểm chính**: Hiệu quả về phần cứng - chỉ cần ⌈log₂(n)⌉ bit trong successive approximation register và D/A converter để phân biệt n giá trị số [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.158].\n\n**Nhược điểm**: Tốc độ chậm, cần O(log₂(n)) bước, phù hợp cho các ứng dụng độ phân giải cao với tốc độ vừa phải như ứng dụng âm thanh.",
+      "answer": "Bộ chuyển đổi ADC sử dụng phương pháp successive approximation hoạt động theo nguyên tắc tìm kiếm nhị phân như sau [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.157]:\n\n1. Khởi tạo: Bit có ý nghĩa nhất (MSB) của successive approximation register được đặt thành '1', tất cả các bit khác được đặt thành '0'.\n\n2. Chuyển đổi D/A: Giá trị số này được chuyển đổi thành giá trị tương tự tương ứng với 0,5 lần điện áp đầu vào tối đa.\n\n3. So sánh: Nếu tín hiệu đầu vào h(t) vượt quá giá trị tương tự được tạo ra, bit MSB được giữ ở '1'; nếu không, nó được đặt lại thành '0'.\n\n4. Lặp lại: Quá trình này được lặp lại với bit tiếp theo, bit sẽ giữ ở '1' nếu đầu vào vượt quá giá trị tương tự được tạo ra.\n\nƯu điểm chính của kỹ thuật này là hiệu quả về phần cứng: để phân biệt n giá trị số, chỉ cần log2(n) bit trong successive approximation register và bộ chuyển đổi D/A. Nhược điểm là tốc độ chậm, vì cần O(log2(n)) bước, nên thích hợp cho các ứng dụng độ phân giải cao với tốc độ vừa phải, chẳng hạn như ứng dụng âm thanh [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.157-158].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.158",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.160",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.157"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.157",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.217",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.199"
       ]
     },
     {
@@ -374,16 +376,16 @@
       "type": "in_scope",
       "question": "What is loop tiling (loop blocking) and why is it applied?",
       "is_fallback": false,
-      "confidence": 0.563,
-      "latency_s": 3.61,
+      "confidence": 0.577,
+      "latency_s": 3.46,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Dựa vào ngữ cảnh được cung cấp:\n\n**Loop tiling (loop blocking)** là một kỹ thuật tối ưu hóa được áp dụng để tận dụng lợi ích của hệ thống bộ nhớ phân cấp. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.368]\n\n**Lý do áp dụng:** Vì bộ nhớ nhỏ nhanh hơn bộ nhớ lớn (như bộ nhớ cache), việc sử dụng hệ thống bộ nhớ phân cấp có thể mang lại lợi ích. Loop tiling/blocking giúp tối ưu hóa việc sử dụng các bộ nhớ \"nhỏ\" này để cải thiện hiệu suất. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.368]",
+      "answer": "Loop tiling (loop blocking) là một kỹ thuật tối ưu hóa được áp dụng để tận dụng lợi ích của hệ thống bộ nhớ phân cấp. [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.368]\n\nLý do áp dụng: Vì bộ nhớ nhỏ nhanh hơn bộ nhớ lớn, việc sử dụng hệ thống bộ nhớ phân cấp có thể mang lại lợi ích. Loop tiling giúp tối ưu hóa việc truy cập bộ nhớ bằng cách chia các vòng lặp thành các khối nhỏ hơn, từ đó cải thiện hiệu suất bộ nhớ cache và tăng tốc độ thực thi chương trình.",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.367",
         "barr_c_coding_standard_2018.pdf tr.66",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.366",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.368"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.368",
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.366"
       ]
     },
     {
@@ -392,10 +394,10 @@
       "question": "What are the two kinds of nodes that make up a Petri net?",
       "is_fallback": true,
       "confidence": 0.668,
-      "latency_s": 2.0,
+      "latency_s": 1.16,
       "retrieval_hit": true,
       "grounded": null,
-      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.\n\nMặc dù tài liệu thảo luận về các loại Petri nets khác nhau (condition/event nets, predicate/transition nets, colored Petri nets), nhưng nó không cung cấp thông tin rõ ràng về hai loại nút cơ bản tạo nên một Petri net.",
+      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
       "sources": []
     },
     {
@@ -404,14 +406,14 @@
       "question": "What does boundary scan (JTAG) provide for testing embedded hardware?",
       "is_fallback": false,
       "confidence": 0.834,
-      "latency_s": 3.95,
+      "latency_s": 2.51,
       "retrieval_hit": true,
       "grounded": true,
-      "answer": "Boundary scan (JTAG) cung cấp các tính năng sau cho việc kiểm tra phần cứng nhúng:\n\n1. **Kết nối scan chains**: JTAG là một tiêu chuẩn được thiết kế để kết nối các scan chains của nhiều chip lại với nhau ở mức board-level integration [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.403]\n\n2. **Thanh ghi tại ranh giới chip**: Tiêu chuẩn định nghĩa các thanh ghi tại ranh giới của tất cả các chip [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.403]\n\n3. **Test pins và control commands**: JTAG cung cấp một số test pins và các lệnh điều khiển sao cho tất cả các chip có thể được kết nối trong scan chains [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.403]\n\nTóm lại, JTAG/boundary scan giải quyết vấn đề kết nối và kiểm tra các scan chains trên nhiều chip trong một hệ thống nhúng.",
+      "answer": "Boundary scan (JTAG) cung cấp một tiêu chuẩn được thiết kế để kết nối các scan chain của nhiều chip ở mức board-level. Cụ thể, tiêu chuẩn này định nghĩa các thanh ghi tại ranh giới của tất cả các chip và một số chân kiểm tra cũng như các lệnh điều khiển, cho phép tất cả các chip có thể được kết nối trong các scan chain [nguồn: Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.403].",
       "sources": [
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.403",
         "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.399",
-        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.402"
+        "Embedded_System_Design_Embedded_Systems_Foundation.pdf tr.397"
       ]
     },
     {
@@ -419,8 +421,8 @@
       "type": "out_of_scope",
       "question": "What is the full pinout of the Arduino Uno board?",
       "is_fallback": true,
-      "confidence": 0.323,
-      "latency_s": 0.02,
+      "confidence": 0.377,
+      "latency_s": 1.31,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
@@ -431,8 +433,8 @@
       "type": "out_of_scope",
       "question": "What are the parameters of the FreeRTOS xQueueCreate() function?",
       "is_fallback": true,
-      "confidence": 0.332,
-      "latency_s": 0.03,
+      "confidence": 0.362,
+      "latency_s": 1.31,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
@@ -443,8 +445,8 @@
       "type": "out_of_scope",
       "question": "How do I debug an embedded target with OpenOCD and GDB over SWD?",
       "is_fallback": true,
-      "confidence": 0.339,
-      "latency_s": 0.02,
+      "confidence": 0.375,
+      "latency_s": 1.24,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
@@ -455,7 +457,7 @@
       "type": "out_of_scope",
       "question": "How do I set up a CI/CD pipeline for firmware using GitHub Actions?",
       "is_fallback": true,
-      "confidence": 0.225,
+      "confidence": 0.228,
       "latency_s": 0.02,
       "retrieval_hit": null,
       "grounded": null,
@@ -467,7 +469,7 @@
       "type": "out_of_scope",
       "question": "How do I flash firmware onto an ESP32 using esptool.py?",
       "is_fallback": true,
-      "confidence": 0.207,
+      "confidence": 0.232,
       "latency_s": 0.02,
       "retrieval_hit": null,
       "grounded": null,
@@ -479,7 +481,7 @@
       "type": "out_of_scope",
       "question": "What is the difference between git merge and git rebase?",
       "is_fallback": true,
-      "confidence": 0.237,
+      "confidence": 0.244,
       "latency_s": 0.02,
       "retrieval_hit": null,
       "grounded": null,
@@ -492,7 +494,7 @@
       "question": "How do I implement a bootloader that performs firmware over-the-air (OTA) updates?",
       "is_fallback": true,
       "confidence": 0.362,
-      "latency_s": 1.07,
+      "latency_s": 0.99,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
@@ -503,8 +505,8 @@
       "type": "out_of_scope",
       "question": "How do I configure the PLL and clock tree registers on an STM32F4 microcontroller?",
       "is_fallback": true,
-      "confidence": 0.367,
-      "latency_s": 1.24,
+      "confidence": 0.366,
+      "latency_s": 1.15,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
@@ -515,11 +517,11 @@
       "type": "out_of_scope",
       "question": "How do I write C unit tests using the Unity and Ceedling frameworks?",
       "is_fallback": true,
-      "confidence": 0.375,
-      "latency_s": 1.02,
+      "confidence": 0.369,
+      "latency_s": 2.06,
       "retrieval_hit": null,
       "grounded": null,
-      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",
+      "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.\n\nTài liệu cung cấp chỉ liên quan đến kiểm thử hệ thống nhúng ở mức phần cứng và mô hình lỗi, không chứa thông tin về các framework kiểm thử đơn vị C như Unity và Ceedling.",
       "sources": []
     },
     {
@@ -527,8 +529,8 @@
       "type": "out_of_scope",
       "question": "What are the SOLID principles of object-oriented design?",
       "is_fallback": true,
-      "confidence": 0.472,
-      "latency_s": 1.28,
+      "confidence": 0.478,
+      "latency_s": 1.15,
       "retrieval_hit": null,
       "grounded": null,
       "answer": "Không tìm thấy thông tin trong tài liệu để trả lời câu hỏi này.",

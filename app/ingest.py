@@ -6,12 +6,14 @@ Chạy trực tiếp:
 """
 from __future__ import annotations
 
+import hashlib
+import statistics
 import sys
 from pathlib import Path
 
+import pypdfium2 as pdfium
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pypdf import PdfReader
 
 from app.vectorstore import get_vectorstore
 from config import settings
@@ -27,22 +29,70 @@ def _splitter() -> RecursiveCharacterTextSplitter:
 
 
 def _load_pages(pdf_path: Path) -> list[Document]:
-    """Đọc PDF -> mỗi trang là 1 Document. Bỏ qua trang không trích được chữ."""
-    reader = PdfReader(str(pdf_path))
+    """Đọc PDF -> mỗi trang là 1 Document. Bỏ qua trang không trích được chữ.
+
+    Dùng pypdfium2 (PDFium — engine PDF của Chromium): trích text ổn định hơn
+    với layout nhiều cột / slide. Chữ nằm trong ảnh raster (sơ đồ, ảnh chụp) vẫn
+    không đọc được — cần OCR, ngoài phạm vi project (xem README).
+    """
     pages: list[Document] = []
-    for idx, page in enumerate(reader.pages):
-        text = (page.extract_text() or "").strip()
-        if text:
-            # page đánh số từ 0; +1 khi hiển thị cho người đọc (làm ở dưới)
-            pages.append(Document(page_content=text, metadata={"page": idx}))
+    pdf = pdfium.PdfDocument(str(pdf_path))
+    try:
+        for idx in range(len(pdf)):
+            page = pdf[idx]
+            textpage = page.get_textpage()
+            text = (textpage.get_text_range() or "").replace("\r\n", "\n").strip()
+            textpage.close()
+            page.close()
+            if text:
+                # page đánh số từ 0; +1 khi hiển thị cho người đọc (làm ở dưới)
+                pages.append(Document(page_content=text, metadata={"page": idx}))
+    finally:
+        pdf.close()
     return pages
 
 
+def _merge_sparse_pages(pages: list[Document]) -> list[Document]:
+    """Gộp các trang liền nhau tới khi khối đủ 'dày' (>= sparse_block_chars).
+
+    Dùng cho PDF trình chiếu: mỗi slide chỉ vài dòng rời rạc; để nguyên từng trang
+    thì chunk quá ngắn, embedding nhiễu, retrieve trượt. `page` của khối lấy theo
+    trang đầu tiên trong khối (trích dẫn sẽ trỏ tới slide đầu của cụm liên quan).
+    """
+    blocks: list[Document] = []
+    buf: list[str] = []
+    start_page: int | None = None
+    for d in pages:
+        if start_page is None:
+            start_page = d.metadata["page"]
+        buf.append(d.page_content)
+        if sum(len(t) for t in buf) >= settings.sparse_block_chars:
+            blocks.append(
+                Document(page_content="\n\n".join(buf), metadata={"page": start_page})
+            )
+            buf, start_page = [], None
+    if buf:
+        blocks.append(
+            Document(page_content="\n\n".join(buf), metadata={"page": start_page})
+        )
+    return blocks
+
+
 def ingest_pdf(pdf_path: str | Path) -> int:
-    """Nạp 1 file PDF vào vector store. Trả về số chunk đã thêm."""
+    """Nạp 1 file PDF vào vector store. Trả về số chunk đã thêm (0 = file y hệt đã có sẵn).
+
+    Chống chunk trùng khi UI tự động ingest mỗi lần submit:
+      - Nội dung file (SHA-256) đã có trong store  -> bỏ qua, không embed lại.
+      - Cùng tên file nhưng nội dung khác (bản mới) -> xoá chunk cũ rồi nạp lại.
+    """
     pdf_path = Path(pdf_path)
     if not pdf_path.exists():
         raise FileNotFoundError(f"Không thấy file: {pdf_path}")
+
+    content_hash = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
+    vs = get_vectorstore()
+    if vs.get(where={"content_hash": content_hash}, limit=1)["ids"]:
+        return 0
 
     pages = _load_pages(pdf_path)
     if not pages:
@@ -51,12 +101,22 @@ def ingest_pdf(pdf_path: str | Path) -> int:
             "(PDF scan ảnh cần OCR — ngoài phạm vi project này)."
         )
 
+    # Tài liệu trình chiếu (text thưa) -> gộp slide liền nhau trước khi chunk.
+    median_chars = statistics.median(len(p.page_content) for p in pages)
+    if median_chars < settings.sparse_median_threshold:
+        pages = _merge_sparse_pages(pages)
+
     chunks = _splitter().split_documents(pages)
     for c in chunks:
         c.metadata["source"] = pdf_path.name
         c.metadata["page"] = int(c.metadata.get("page", 0)) + 1
+        c.metadata["content_hash"] = content_hash
 
-    get_vectorstore().add_documents(chunks)
+    # Dọn bản cũ cùng tên (nếu có) trước khi nạp bản mới.
+    if vs.get(where={"source": pdf_path.name}, limit=1)["ids"]:
+        vs.delete(where={"source": pdf_path.name})
+
+    vs.add_documents(chunks)
     return len(chunks)
 
 

@@ -32,12 +32,15 @@ class RetrievalResult:
         return len(self.chunks) > 0 and self.confidence >= settings.confidence_threshold
 
 
-def retrieve(question: str, k: int | None = None) -> RetrievalResult:
+def retrieve(
+    question: str, k: int | None = None, source: str | None = None
+) -> RetrievalResult:
+    """Truy hồi top-k chunk. `source` != None -> chỉ tìm trong file đó."""
     k = k or settings.top_k
     vs = get_vectorstore()
     # relevance score đã quy về [0, 1] (1 = giống nhất) nhờ cosine space.
     pairs: list[tuple[Document, float]] = vs.similarity_search_with_relevance_scores(
-        question, k=k
+        question, k=k, filter={"source": source} if source else None
     )
     chunks = [
         RetrievedChunk(

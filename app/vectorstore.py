@@ -17,3 +17,13 @@ def get_vectorstore() -> Chroma:
         # Dùng cosine để điểm relevance quy về [0, 1] (1 - cosine_distance)
         collection_metadata={"hnsw:space": "cosine"},
     )
+
+
+def list_sources() -> list[dict[str, object]]:
+    """Danh sách file đã nạp + số chunk mỗi file, sắp theo tên."""
+    metadatas = get_vectorstore().get(include=["metadatas"])["metadatas"]
+    counts: dict[str, int] = {}
+    for m in metadatas:
+        name = m.get("source", "unknown")
+        counts[name] = counts.get(name, 0) + 1
+    return [{"source": s, "n_chunks": n} for s, n in sorted(counts.items())]
