@@ -125,58 +125,186 @@ pytest -q                                  # No API key required (~20s)
 
 ### Data Flow
 
+#### **1. Document Ingestion Pipeline**
+
 ```
-PDF Input
+PDF Files (data/ folder)
     ↓
-┌─────────────────────────────────────────┐
-│ app/ingest.py                           │
-│ • PDF text extraction (pypdfium2)       │
-│ • Slide merging for sparse PDFs         │
-│ • Text chunking (LangChain)             │
-└──────────────────┬──────────────────────┘
+┌────────────────────────────────────────────────────┐
+│ app/ingest.py: Extract & Prepare                   │
+│ • Read PDF text page-by-page (pypdfium2)           │
+│ • Detect sparse PDFs (slide decks): merge pages    │
+│ • Split into chunks (LangChain RecursiveTextSplit)│
+│ • Content hash: skip duplicates on re-upload       │
+└──────────────────┬─────────────────────────────────┘
                    ↓
-        app/embeddings.py
-    (sentence-transformers local)
-                   ↓
-        app/vectorstore.py
-     (Chroma, persisted to disk)
+        ┌──────────────────────────────────┐
+        │ app/embeddings.py                │
+        │ Convert chunks → embeddings      │
+        │ Model: all-MiniLM-L6-v2 (local)  │
+        │ 22M params, runs offline         │
+        └────────────┬─────────────────────┘
+                     ↓
+        ┌──────────────────────────────────┐
+        │ app/vectorstore.py               │
+        │ Store embeddings in Chroma       │
+        │ Cosine similarity space          │
+        │ Persisted: storage/chroma/       │
+        └──────────────────────────────────┘
+```
 
+**Key Features:**
+- ✅ No API key needed for ingestion
+- ✅ Automatic deduplication via content hash
+- ✅ Sparse PDF detection: slides with <700 chars/page are merged
+- ✅ Configurable chunk size (default: 1000 chars with 150 char overlap)
 
+---
+
+#### **2. Question Answering Pipeline**
+
+```
 User Question
     ↓
-┌─────────────────────────────────────────┐
-│ app/rag.py (orchestration)              │
-└──────────────────┬──────────────────────┘
-                   ├─────────────────────┬──────────────┐
-            "Summary Mode"        Regular Question
-                   │                    │
-                   ↓                    ↓
-        app/summarize.py      Query Rewrite (if needed)
-     (map-reduce over all         app/rag.py
-      chunks of one file)             ↓
-                   │          app/retriever.py
-                   │      • Similarity search (top-k)
-                   │      • Calculate confidence score
-                   │      • Filter by scope (if needed)
-                   │                    │
-                   └────────┬───────────┘
-                            ↓
-                  ┌──────────────────────┐
-              Confidence < Threshold?
-                  │                     │
-              YES │                     │ NO
-                  ↓                     ↓
-           FALLBACK Tier-1       app/llm.py
-         "No relevant info"      (Claude API)
-                                     │
-                                     ├─ Claude detects
-                                     │  insufficient context?
-                                     │
-                                     ├─ YES → FALLBACK Tier-2
-                                     │
-                                     └─ NO → Answer
-                                            + Sources
-                                            + Confidence
+    ┌─────────────────────────────────────┐
+    │ app/rag.py: Orchestration Layer     │
+    │ Normalize question (NFC unicode)     │
+    │ Detect intent: summary vs. regular  │
+    └─────────┬───────────────────────────┘
+              │
+              ├─ Is it a summary request?
+              │  ("summarize", "list all", "overview", etc.)
+              │
+              ├─ YES → Go to SUMMARY BRANCH
+              │
+              └─ NO → Go to REGULAR BRANCH
+
+
+SUMMARY BRANCH:
+    ↓
+    ┌────────────────────────────────────┐
+    │ app/summarize.py: Map-Reduce       │
+    │ • Get ALL chunks from one file     │
+    │ • Batch into 6000-char segments   │
+    │ • Claude summarizes each batch     │
+    │ • Reduce: combine summaries        │
+    │ • Long docs: sample uniformly      │
+    └──────────────┬────────────────────┘
+                   │ (Summary answer ready)
+                   ↓
+    ┌────────────────────────────────────┐
+    │ Return Answer                       │
+    │ • Content: full summary            │
+    │ • Confidence: 1.0 (always trusted) │
+    │ • Source: filename                 │
+    └────────────────────────────────────┘
+
+
+REGULAR BRANCH:
+    ↓
+    ┌────────────────────────────────────┐
+    │ app/rag.py: Query Rewrite          │
+    │ Check: Is question in Vietnamese   │
+    │        or has instruction phrases? │
+    └──────────────┬────────────────────┘
+                   │
+                   ├─ YES → Claude rewrites to search query
+                   │        Remove filler: "please", "explain"
+                   │        Translate to English if needed
+                   │
+                   └─ NO → Use original question
+                          (clean English queries skip rewriting)
+                   │
+                   ↓
+    ┌────────────────────────────────────┐
+    │ app/retriever.py: Search            │
+    │ • Find top-4 similar chunks         │
+    │ • Cosine similarity scoring (0-1)   │
+    │ • Optional: filter by scope         │
+    │ • Calculate confidence:             │
+    │   confidence = highest_score        │
+    └──────────────┬────────────────────┘
+                   │
+                   ↓
+    ┌────────────────────────────────────┐
+    │ CONFIDENCE CHECK (TIER 1 FALLBACK) │
+    │ confidence < 0.35?                 │
+    └─┬──────────────────────────────────┘
+      │
+      ├─ YES → FALLBACK (no LLM call, saves cost)
+      │        Return: "No relevant information found"
+      │        Confidence: 0
+      │
+      └─ NO → Call Claude (TIER 2 decision)
+              │
+              ↓
+        ┌───────────────────────────────┐
+        │ app/llm.py: Claude API Call   │
+        │ Prompt structure:             │
+        │  • SYSTEM: Be grounded,       │
+        │    cite sources, refuse if    │
+        │    context insufficient       │
+        │  • USER: [CONTEXT] + [Q]      │
+        │  • Get: answer + source refs  │
+        └──────────┬────────────────────┘
+                   │
+                   ├─ Claude says: "I cannot answer based on..."
+                   │              → FALLBACK (TIER 2)
+                   │
+                   └─ Claude provides grounded answer
+                      → Return with:
+                        • Answer text
+                        • Source citations [source: file p.X]
+                        • Confidence score
+                        • Latency timing
+
+
+FINAL OUTPUT:
+    ↓
+    ┌────────────────────────────────────┐
+    │ API Response (JSON)                │
+    │ {                                  │
+    │   "answer": "...",                 │
+    │   "sources": ["file1", "file2"],  │
+    │   "confidence": 0.85,              │
+    │   "is_fallback": false,            │
+    │   "latency_s": 2.3,                │
+    │   "search_query": "rewritten q"   │
+    │ }                                  │
+    └────────────────────────────────────┘
+```
+
+**Two-Tier Hallucination Prevention:**
+- **Tier 1 (Retrieval):** Low confidence → reject without LLM (cost-effective)
+- **Tier 2 (Generation):** Claude self-recognizes insufficient context → refuse
+
+---
+
+#### **3. Key Decision Points**
+
+| Decision | Logic | Outcome |
+|----------|-------|---------|
+| **Summary Mode?** | Contains: "summarize", "overview", "list all" | → Map-reduce over ALL chunks |
+| **Query Rewrite?** | Vietnamese OR instruction phrases | → Claude optimizes for search |
+| **Confidence Threshold** | similarity_score < 0.35 | → FALLBACK Tier-1 (no LLM call) |
+| **Context Insufficient?** | Claude detects gaps | → FALLBACK Tier-2 (refuse answer) |
+
+---
+
+#### **4. File Dependencies**
+
+```
+User Request
+    ↓
+app/rag.py (entry point for CLI, API, eval)
+    ├─→ app/ingest.py (if PDF attached)
+    ├─→ app/summarize.py (if summary mode)
+    ├─→ app/retriever.py (always for regular Q)
+    │    ├─→ app/vectorstore.py
+    │    └─→ app/embeddings.py
+    ├─→ app/llm.py (if confidence >= threshold)
+    └─→ Returns Answer object
+           (answer, sources, confidence, latency_s)
 ```
 
 ### Technology Stack
