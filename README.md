@@ -164,11 +164,11 @@ PDF Files (data/ folder)
 #### **2. Question Answering Pipeline**
 
 ```
-User Question
-    ↓
+                User Question
+                      ↓
     ┌─────────────────────────────────────┐
     │ app/rag.py: Orchestration Layer     │
-    │ Normalize question (NFC unicode)     │
+    │ Normalize question (NFC unicode)    │
     │ Detect intent: summary vs. regular  │
     └─────────┬───────────────────────────┘
               │
@@ -180,33 +180,33 @@ User Question
               └─ NO → Go to REGULAR BRANCH
 
 
-SUMMARY BRANCH:
-    ↓
+                SUMMARY BRANCH:
+                      ↓
     ┌────────────────────────────────────┐
     │ app/summarize.py: Map-Reduce       │
     │ • Get ALL chunks from one file     │
-    │ • Batch into 6000-char segments   │
+    │ • Batch into 6000-char segments    │
     │ • Claude summarizes each batch     │
     │ • Reduce: combine summaries        │
     │ • Long docs: sample uniformly      │
-    └──────────────┬────────────────────┘
+    └──────────────┬─────────────────────┘
                    │ (Summary answer ready)
                    ↓
     ┌────────────────────────────────────┐
-    │ Return Answer                       │
+    │ Return Answer                      │
     │ • Content: full summary            │
     │ • Confidence: 1.0 (always trusted) │
     │ • Source: filename                 │
     └────────────────────────────────────┘
 
 
-REGULAR BRANCH:
-    ↓
+                REGULAR BRANCH:
+                    ↓
     ┌────────────────────────────────────┐
     │ app/rag.py: Query Rewrite          │
     │ Check: Is question in Vietnamese   │
     │        or has instruction phrases? │
-    └──────────────┬────────────────────┘
+    └──────────────┬─────────────────────┘
                    │
                    ├─ YES → Claude rewrites to search query
                    │        Remove filler: "please", "explain"
@@ -216,14 +216,14 @@ REGULAR BRANCH:
                           (clean English queries skip rewriting)
                    │
                    ↓
-    ┌────────────────────────────────────┐
+    ┌─────────────────────────────────────┐
     │ app/retriever.py: Search            │
     │ • Find top-4 similar chunks         │
     │ • Cosine similarity scoring (0-1)   │
     │ • Optional: filter by scope         │
     │ • Calculate confidence:             │
     │   confidence = highest_score        │
-    └──────────────┬────────────────────┘
+    └──────────────┬──────────────────────┘
                    │
                    ↓
     ┌────────────────────────────────────┐
@@ -265,11 +265,11 @@ FINAL OUTPUT:
     │ API Response (JSON)                │
     │ {                                  │
     │   "answer": "...",                 │
-    │   "sources": ["file1", "file2"],  │
+    │   "sources": ["file1", "file2"],   │
     │   "confidence": 0.85,              │
     │   "is_fallback": false,            │
     │   "latency_s": 2.3,                │
-    │   "search_query": "rewritten q"   │
+    │   "search_query": "rewritten q"    │
     │ }                                  │
     └────────────────────────────────────┘
 ```
