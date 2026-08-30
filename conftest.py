@@ -1,6 +1,8 @@
-# pytest tự thêm thư mục chứa file này vào sys.path, nhờ đó `import app` /
-# `import config` chạy được khi gõ `pytest` từ gốc repo.
-"""Fixture chung cho test."""
+"""Common pytest configuration for isolated test runs.
+
+This file sits at the repository root so pytest resolves the project modules
+without requiring an editable install step.
+"""
 from __future__ import annotations
 
 import pytest
@@ -10,6 +12,5 @@ from config import settings
 
 @pytest.fixture(autouse=True)
 def _isolate_vector_store(tmp_path, monkeypatch):
-    # Trỏ vector store sang thư mục tạm: test không đụng storage/chroma/ thật
-    # (tránh nhân đôi chunk và phụ thuộc vào dữ liệu đã ingest sẵn).
+    """Use a temporary Chroma directory so tests cannot pollute real data."""
     monkeypatch.setattr(settings, "vector_dir", tmp_path / "chroma")
